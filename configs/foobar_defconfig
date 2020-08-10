@@ -1,0 +1,7 @@
+foo:
+	echo foo
+
+bar:
+	echo bar
+
+MANUAL_TARGETS += bar
