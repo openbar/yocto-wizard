@@ -1,5 +1,6 @@
 MAKEFLAGS += --no-builtin-rules
 MAKEFLAGS += --no-builtin-variables
+MAKEFLAGS += --no-print-directory
 
 ifneq ($(realpath ${CONFIG}),)
  $(call load-variables)
