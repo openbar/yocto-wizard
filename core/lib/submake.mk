@@ -8,6 +8,10 @@ ifneq ($(origin BUILDDIR),command line)
  $(error The directory BUILDDIR must be specified in the command line)
 endif
 
+ifneq ($(origin VERBOSE),command line)
+ $(error The variable VERBOSE must be specified in the command line)
+endif
+
 ifeq ($(realpath ${CONFIG}),)
  $(error The CONFIG file must exist)
 endif

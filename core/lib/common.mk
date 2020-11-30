@@ -2,6 +2,11 @@ MAKEFLAGS += --no-builtin-rules
 MAKEFLAGS += --no-builtin-variables
 MAKEFLAGS += --no-print-directory
 
+ifeq (${VERBOSE},0)
+ MAKEFLAGS += --silent
+ QUIET := >/dev/null
+endif
+
 ifneq ($(realpath ${CONFIG}),)
  $(call load-variables)
 endif

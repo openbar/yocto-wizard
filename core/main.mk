@@ -27,6 +27,15 @@ ifneq ($(filter-out ${NO_DEFCONFIG_TARGETS},${TARGETS}),)
  endif
 endif
 
+# Support the V= option in command line.
+ifeq ($(origin V),command line)
+ ifneq ($(V),0)
+  VERBOSE := $(V)
+ endif
+endif
+
+VERBOSE ?= 0
+
 include ${WZDIR}/core/lib/common.mk
 include ${WZDIR}/core/lib/forward.mk
 
@@ -73,5 +82,7 @@ help::
 	@echo '  help                 - Display this help'
 	@echo
 	@echo 'Command line options:'
+	@echo '  make V=0-1 [targets] 0 => quiet build (default)'
+	@echo '                       1 => verbose build'
 	@echo '  make O=dir [targets] Use the specified build directory' \
 		'(default: build)'
