@@ -1,3 +1,6 @@
+MAKEFLAGS += --no-builtin-rules
+MAKEFLAGS += --no-builtin-variables
+
 ifneq ($(realpath ${CONFIG}),)
  $(call load-variables)
 endif
