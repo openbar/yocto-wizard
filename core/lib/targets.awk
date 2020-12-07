@@ -3,10 +3,10 @@
 BEGIN				{ ORS = "\v" }
 
 # Explicit targets are defined in the Files section
-/^#\s+Files$/			{ target_section = 1 }
+/^#[[:space:]]+Files$/		{ target_section = 1 }
 
 # Not a target blocks are ignored
-/^#\s+Not a target:$/		{ notatarget = 1 }
+/^#[[:space:]]+Not a target:$/	{ notatarget = 1 }
 /^$/				{ notatarget = 0 }
 
 # Comments and blank lines are skipped
