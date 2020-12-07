@@ -40,7 +40,7 @@ include ${WZDIR}/core/lib/common.mk
 include ${WZDIR}/core/lib/forward.mk
 
 .forward:
-	${MAKE_FORWARD} -f ${WZDIR}/core/forward.mk
+	${MAKE_FORWARD} -f ${WZDIR}/core/docker.mk
 
 .PHONY: ${DEFCONFIG_TARGETS}
 ${DEFCONFIG_TARGETS}:
