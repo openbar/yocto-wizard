@@ -26,6 +26,7 @@ DOCKER_BUILD += ${DOCKERCONTEXT}
 
 DOCKER_RUN := docker run
 DOCKER_RUN += --rm			# Never save the running container
+DOCKER_RUN += --log-driver=none		# Disables any logging for the container
 DOCKER_RUN += --interactive --tty	# Allow to run interactive commands
 
 # Bind local user and group
