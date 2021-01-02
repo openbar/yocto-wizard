@@ -70,6 +70,9 @@ BEGIN				{ FS = ":" }
 /^\.ONESHELL:/			|| \
 /^\.POSIX:/			{ notatarget = 1 }
 
+# Internal targets are ignored
+/^shell:/			{ notatarget = 1 }
+
 # Recipes are skipped
 /^\t/				{ next }
 

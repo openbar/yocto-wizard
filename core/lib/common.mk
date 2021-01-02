@@ -11,6 +11,9 @@ ifneq ($(realpath ${CONFIG}),)
  $(call load-variables)
 endif
 
+ALL_TARGETS += shell
+MANUAL_TARGETS += shell
+
 AUTO_TARGETS := $(filter-out ${MANUAL_TARGETS},${ALL_TARGETS})
 
 .PHONY: all ${ALL_TARGETS}

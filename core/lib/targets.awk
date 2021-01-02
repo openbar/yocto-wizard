@@ -29,6 +29,9 @@ BEGIN				{ ORS = "\v" }
 /^\.ONESHELL:/			|| \
 /^\.POSIX:/			{ notatarget = 1 }
 
+# Internal targets are ignored
+/^shell:/			{ notatarget = 1 }
+
 # Remaining blocks are printed
 {
 	if (target_section > 0 && !notatarget) {

@@ -5,3 +5,6 @@ include ${WZDIR}/core/lib/submake.mk
 include ${WZDIR}/core/lib/common.mk
 
 $(call load-targets)
+
+shell:
+	${SHELL}
