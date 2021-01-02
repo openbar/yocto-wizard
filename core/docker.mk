@@ -22,6 +22,7 @@ DOCKER_BUILD += ${DOCKERCONTEXT}
 
 DOCKER_RUN := docker run
 DOCKER_RUN += --rm			# Never save the running container
+DOCKER_RUN += --interactive --tty	# Allow to run interactive commands
 
 # Bind local user and group
 DOCKER_RUN += -u $$(id -u):$$(id -g)
