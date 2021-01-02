@@ -21,10 +21,18 @@ DOCKER_BUILD += ${DOCKERCONTEXT}
 	${QUIET} ${DOCKER_BUILD}
 
 DOCKER_RUN := docker run
-DOCKER_RUN += --rm
-DOCKER_RUN += -v ${REPODIR}:${REPODIR}
-DOCKER_RUN += -w ${REPODIR}
+DOCKER_RUN += --rm			# Never save the running container
+
+# Bind local user and group
 DOCKER_RUN += -u $$(id -u):$$(id -g)
+DOCKER_RUN += -v /etc/passwd:/etc/passwd:ro
+DOCKER_RUN += -v /etc/group:/etc/group:ro
+
+# Mount the repo directory as working directory
+DOCKER_RUN += -w ${REPODIR}
+DOCKER_RUN += -v ${REPODIR}:${REPODIR}
+
+# Use the previously build image
 DOCKER_RUN += $$(${DOCKER_BUILD} -q)
 
 .PHONY: .docker-run
