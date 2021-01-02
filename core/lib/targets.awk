@@ -13,21 +13,21 @@ BEGIN				{ ORS = "\v" }
 /^#/ || /^$/			{ next }
 
 # Special targets are ignored
-/^\.PHONY/			|| \
-/^\.SUFFIXES/			|| \
-/^\.DEFAULT/			|| \
-/^\.PRECIOUS/			|| \
-/^\.INTERMEDIATE/		|| \
-/^\.SECONDARY/			|| \
-/^\.SECONDEXPANSION/		|| \
-/^\.DELETE_ON_ERROR/		|| \
-/^\.IGNORE/			|| \
-/^\.LOW_RESOLUTION_TIME/	|| \
-/^\.SILENT/			|| \
-/^\.EXPORT_ALL_VARIABLES/	|| \
-/^\.NOTPARALLEL/		|| \
-/^\.ONESHELL/			|| \
-/^\.POSIX/			{ notatarget = 1 }
+/^\.PHONY:/			|| \
+/^\.SUFFIXES:/			|| \
+/^\.DEFAULT:/			|| \
+/^\.PRECIOUS:/			|| \
+/^\.INTERMEDIATE:/		|| \
+/^\.SECONDARY:/			|| \
+/^\.SECONDEXPANSION:/		|| \
+/^\.DELETE_ON_ERROR:/		|| \
+/^\.IGNORE:/			|| \
+/^\.LOW_RESOLUTION_TIME:/	|| \
+/^\.SILENT:/			|| \
+/^\.EXPORT_ALL_VARIABLES:/	|| \
+/^\.NOTPARALLEL:/		|| \
+/^\.ONESHELL:/			|| \
+/^\.POSIX:/			{ notatarget = 1 }
 
 # Remaining blocks are printed
 {
