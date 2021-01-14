@@ -1,0 +1,17 @@
+DISTRO	:= poky
+MACHINE	:= qemux86-64
+IMAGE	:= core-image-minimal
+
+# Allows the sources to be fetched manually
+fetch:
+	bitbake ${IMAGE} --runall=fetch
+
+MANUAL_TARGETS := fetch
+
+#  Build the image automatically
+build:
+	time bitbake ${IMAGE}
+
+# Keep downloads and shared state cache out of the build directory
+DL_DIR		:= ${REPODIR}/downloads
+SSTATE_DIR	:= ${REPODIR}/sstate-cache
