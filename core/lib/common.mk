@@ -19,4 +19,6 @@ AUTO_TARGETS := $(filter-out ${MANUAL_TARGETS},${ALL_TARGETS})
 .PHONY: all ${ALL_TARGETS}
 all: ${AUTO_TARGETS}
 
+SHELL := /bin/bash
+
 PROJECT := $(notdir ${REPODIR})

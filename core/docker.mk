@@ -57,7 +57,7 @@ DOCKER_RUN += ${DOCKER_TAG}
 
 .PHONY: .docker-run
 .docker-run: .docker-build | ${DOCKER_VOLUMES}
-	${DOCKER_RUN} ${MAKE_FORWARD} -f ${WZDIR}/core/config.mk
+	${DOCKER_RUN} ${MAKE_FORWARD} -f ${WZDIR}/core/oe-init-build-env.mk
 
 ${DOCKER_VOLUMES}:
 	mkdir -p $@
