@@ -1,6 +1,10 @@
 CONFIG := ${REPODIR}/.config
 
-run-awk = $(shell ${MAKE} -npqf ${CONFIG} | awk -f ${WZDIR}/core/lib/${1})
+MAKE_AWK := ${MAKE}
+MAKE_AWK += REPODIR=${REPODIR}
+MAKE_AWK += BUILDDIR=${BUILDDIR}
+
+run-awk = $(shell ${MAKE_AWK} -npqf ${CONFIG} | awk -f ${WZDIR}/core/lib/${1})
 
 empty :=
 verticaltab := ${empty}${empty}
