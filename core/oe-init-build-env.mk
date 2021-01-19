@@ -26,6 +26,6 @@ $(foreach variable,${EXPORTED_VARIABLES},\
 .PHONY: .oe-init-build-env
 .oe-init-build-env: .clean-bblayers
 	${QUIET} . ${OE_INIT_BUILD_ENV} ${BUILDDIR} \
-		&& ${MAKE_FORWARD} -f ${WZDIR}/core/config.mk
+		&& ${MAKE_FORWARD} -f ${WZDIR}/core/bitbake-layers.mk
 
 .forward: .oe-init-build-env
