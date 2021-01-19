@@ -28,6 +28,7 @@ DOCKER_RUN := docker run
 DOCKER_RUN += --rm			# Never save the running container
 DOCKER_RUN += --log-driver=none		# Disables any logging for the container
 DOCKER_RUN += --interactive --tty	# Allow to run interactive commands
+DOCKER_RUN += --privileged		# Allow access to devices
 
 # Set the hostname to be identifiable
 DOCKER_RUN += --hostname $(subst /,-,${DOCKER_IMAGE})
@@ -36,6 +37,8 @@ DOCKER_RUN += --hostname $(subst /,-,${DOCKER_IMAGE})
 DOCKER_RUN += -u $$(id -u):$$(id -g)
 DOCKER_RUN += -v /etc/passwd:/etc/passwd:ro
 DOCKER_RUN += -v /etc/group:/etc/group:ro
+# The local shadow file is needed to make sudo happy (account validation)
+DOCKER_RUN += -v /etc/shadow:/etc/shadow:ro
 
 # Mount the repo directory as working directory
 DOCKER_RUN += -w ${REPODIR}

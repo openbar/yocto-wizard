@@ -12,12 +12,17 @@ RUN	set -x \
 		file \
 		gawk \
 		git \
+		iproute2 \
+		iptables \
 		locales \
 		make \
 		python3 \
 		python3-distutils \
+		qemu \
+		sudo \
 		wget \
 	&& rm -rf /var/lib/apt/lists/* \
-	&& localedef -i en_US -c -f UTF-8 en_US.UTF-8
+	&& localedef -i en_US -c -f UTF-8 en_US.UTF-8 \
+	&& echo "ALL ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/all
 
 ENV	LANG en_US.utf8
