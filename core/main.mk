@@ -9,6 +9,12 @@ endif
 
 BUILDDIR ?= ${REPODIR}/build
 
+HAVE_FOREACH := $(filter foreach,${MAKECMDGOALS})
+
+ifneq (${HAVE_FOREACH},)
+ FOREACH_TARGETS := $(filter-out foreach,${MAKECMDGOALS})
+endif
+
 include ${WZDIR}/core/lib/config.mk
 
 DEFCONFIGDIR := ${WZDIR}/configs
@@ -18,6 +24,7 @@ DEFCONFIG_TARGETS := $(sort $(notdir $(wildcard ${DEFCONFIGDIR}/*_defconfig)))
 TARGETS := $(if $(MAKECMDGOALS),$(MAKECMDGOALS),all)
 
 NO_DEFCONFIG_TARGETS := ${DEFCONFIG_TARGETS} clean help
+NO_DEFCONFIG_TARGETS += foreach ${FOREACH_TARGETS}
 
 ifneq ($(filter-out ${NO_DEFCONFIG_TARGETS},${TARGETS}),)
  ifeq ($(realpath ${CONFIG}),)
@@ -37,10 +44,28 @@ endif
 VERBOSE ?= 0
 
 include ${WZDIR}/core/lib/common.mk
-include ${WZDIR}/core/lib/forward.mk
 
-.forward:
+ifneq (${HAVE_FOREACH},)
+ .PHONY: foreach ${FOREACH_TARGETS}
+
+ ${FOREACH_TARGETS}: foreach
+
+ foreach:
+	if [ -f ${CONFIG} ]; then \
+		cp ${CONFIG} ${CONFIG}.old; \
+		trap "cp ${CONFIG}.old ${CONFIG}" EXIT; \
+	else \
+		trap "rm -f ${CONFIG}" EXIT; \
+	fi; \
+	for TARGET in ${DEFCONFIG_TARGETS}; do \
+		${MAKE} $${TARGET} && ${MAKE} ${FOREACH_TARGETS}; \
+	done
+else
+ include ${WZDIR}/core/lib/forward.mk
+
+ .forward:
 	${MAKE_FORWARD} -f ${WZDIR}/core/docker.mk
+endif
 
 .PHONY: ${DEFCONFIG_TARGETS}
 ${DEFCONFIG_TARGETS}:
@@ -80,6 +105,7 @@ help::
 	@echo
 	@echo 'Usefull targets:'
 	@echo '  help                 - Display this help'
+	@echo '  foreach [targets]    - Build targets for each configuration'
 	@echo
 	@echo 'Command line options:'
 	@echo '  make V=0-1 [targets] 0 => quiet build (default)'
