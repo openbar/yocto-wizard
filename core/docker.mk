@@ -5,7 +5,7 @@ include ${WZDIR}/core/lib/submake.mk
 include ${WZDIR}/core/lib/common.mk
 include ${WZDIR}/core/lib/forward.mk
 
-DOCKERDIR := ${WZDIR}/docker
+DOCKERDIR := ${REPODIR}/configs/docker
 
 DOCKER ?= default
 DOCKERFILENAME ?= Dockerfile
