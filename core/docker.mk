@@ -33,12 +33,16 @@ DOCKER_RUN += --privileged		# Allow access to devices
 # Set the hostname to be identifiable
 DOCKER_RUN += --hostname $(subst /,-,${DOCKER_IMAGE})
 
-# Bind local user and group
-DOCKER_RUN += -u $$(id -u):$$(id -g)
-DOCKER_RUN += -v /etc/passwd:/etc/passwd:ro
-DOCKER_RUN += -v /etc/group:/etc/group:ro
-# The local shadow file is needed to make sudo happy (account validation)
-DOCKER_RUN += -v /etc/shadow:/etc/shadow:ro
+# Bind local user and group using the docker entrypoint
+DOCKER_RUN += -v ${WZDIR}/core/lib/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh:ro
+DOCKER_RUN += --entrypoint docker-entrypoint.sh
+
+DOCKER_RUN += -e DOCKER_UID=$$(id -u)
+DOCKER_RUN += -e DOCKER_GID=$$(id -g)
+
+ifdef DOCKER_GROUPS
+ DOCKER_RUN += -e DOCKER_GROUPS=$(subst ${space},${comma},$(strip ${DOCKER_GROUPS}))
+endif
 
 # Mount the repo directory as working directory
 DOCKER_RUN += -w ${REPODIR}

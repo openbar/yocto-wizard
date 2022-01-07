@@ -7,6 +7,9 @@ MAKE_AWK += BUILDDIR=${BUILDDIR}
 run-awk = $(shell ${MAKE_AWK} -npqf ${CONFIG} | awk -f ${WZDIR}/core/lib/${1})
 
 empty :=
+
+comma := ,
+space := ${empty} ${empty}
 verticaltab := ${empty}${empty}
 
 define newline
