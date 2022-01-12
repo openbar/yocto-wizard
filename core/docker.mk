@@ -27,8 +27,12 @@ DOCKER_BUILD += ${DOCKERCONTEXT}
 DOCKER_RUN := docker run
 DOCKER_RUN += --rm			# Never save the running container
 DOCKER_RUN += --log-driver=none		# Disables any logging for the container
-DOCKER_RUN += --interactive --tty	# Allow to run interactive commands
 DOCKER_RUN += --privileged		# Allow access to devices
+
+# Allow to run interactive commands
+ifeq ($(shell tty -s && echo interactive), interactive)
+ DOCKER_RUN += --interactive --tty
+endif
 
 # Set the hostname to be identifiable
 DOCKER_RUN += --hostname $(subst /,-,${DOCKER_IMAGE})
