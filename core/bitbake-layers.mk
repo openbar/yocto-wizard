@@ -7,7 +7,7 @@ include ${WZDIR}/core/lib/forward.mk
 
 .PHONY: .add-layers
 .add-layers:
-ifneq (${BBLAYERS},)
+ifneq ($(strip ${BBLAYERS}),)
 	bitbake-layers add-layer -q ${BBLAYERS}
 endif
 
