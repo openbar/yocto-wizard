@@ -7,7 +7,7 @@ include ${WZDIR}/core/lib/forward.mk
 
 OE_INIT_BUILD_ENV ?= platform/poky/oe-init-build-env
 
-EXPORTED_VARIABLES := REPODIR BUILDDIR DL_DIR SSTATE_DIR DISTRO MACHINE
+BB_EXPORT_VARIABLES := REPODIR BUILDDIR DL_DIR SSTATE_DIR DISTRO MACHINE
 
 define export-variable
  ifdef ${1}
@@ -16,7 +16,7 @@ define export-variable
  endif
 endef
 
-$(foreach variable,${EXPORTED_VARIABLES},\
+$(foreach variable,${BB_EXPORT_VARIABLES},\
 	$(eval $(call export-variable,${variable})))
 
 .PHONY: .clean-bblayers

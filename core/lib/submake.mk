@@ -1,17 +1,19 @@
-ifneq ($(origin REPODIR),command line)
- $(error The directory REPODIR must be specified in the command line)
+ifndef REPODIR
+ $(error The directory REPODIR must be specified)
 else ifeq ($(realpath ${REPODIR}),)
  $(error The directory REPODIR must exist)
 endif
 
-ifneq ($(origin BUILDDIR),command line)
- $(error The directory BUILDDIR must be specified in the command line)
+ifndef BUILDDIR
+ $(error The directory BUILDDIR must be specified)
 endif
 
-ifneq ($(origin VERBOSE),command line)
- $(error The variable VERBOSE must be specified in the command line)
+ifndef VERBOSE
+ $(error The variable VERBOSE must be specified)
 endif
 
-ifeq ($(realpath ${CONFIG}),)
+ifndef CONFIG
+ $(error The variable CONFIG must be specified)
+else ifeq ($(realpath ${CONFIG}),)
  $(error The CONFIG file must exist)
 endif

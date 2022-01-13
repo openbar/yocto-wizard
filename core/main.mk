@@ -1,13 +1,13 @@
 WZDIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST}))..)
 
-REPODIR := ${CURDIR}
+export REPODIR := ${CURDIR}
 
 # Support the O= option in command line.
 ifeq ($(origin O),command line)
  BUILDDIR := $(abspath ${O})
 endif
 
-BUILDDIR ?= ${REPODIR}/build
+export BUILDDIR ?= ${REPODIR}/build
 
 HAVE_FOREACH := $(filter foreach,${MAKECMDGOALS})
 
@@ -41,7 +41,7 @@ ifeq ($(origin V),command line)
  endif
 endif
 
-VERBOSE ?= 0
+export VERBOSE ?= 0
 
 include ${WZDIR}/core/lib/common.mk
 

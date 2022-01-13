@@ -21,4 +21,4 @@ all: ${AUTO_TARGETS}
 
 SHELL := /bin/bash
 
-PROJECT := $(notdir ${REPODIR})
+export PROJECT := $(notdir ${REPODIR})

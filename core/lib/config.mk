@@ -1,10 +1,6 @@
 CONFIG := ${REPODIR}/.config
 
-MAKE_AWK := ${MAKE}
-MAKE_AWK += REPODIR=${REPODIR}
-MAKE_AWK += BUILDDIR=${BUILDDIR}
-
-run-awk = $(shell ${MAKE_AWK} -npqf ${CONFIG} | awk -f ${WZDIR}/core/lib/${1})
+run-awk = $(shell ${MAKE} -npqf ${CONFIG} | awk -f ${WZDIR}/core/lib/${1})
 
 empty :=
 

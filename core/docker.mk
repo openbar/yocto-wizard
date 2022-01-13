@@ -52,6 +52,23 @@ endif
 DOCKER_RUN += -w ${REPODIR}
 DOCKER_RUN += -v ${REPODIR}:${REPODIR}
 
+# Export environment variables
+override DOCKER_EXPORT_VARIABLES += REPODIR BUILDDIR VERBOSE
+override DOCKER_EXPORT_VARIABLES += OE_INIT_BUILD_ENV
+override DOCKER_EXPORT_VARIABLES += BB_EXPORT_VARIABLES ${BB_EXPORT_VARIABLES}
+override DOCKER_EXPORT_VARIABLES += BBLAYERS
+
+define export-variable
+ ifdef ${1}
+  ifeq ($(origin ${1}),$(filter $(origin ${1}),environment command line))
+   DOCKER_RUN += -e ${1}=${${1}}
+  endif
+ endif
+endef
+
+$(foreach variable,${DOCKER_EXPORT_VARIABLES},\
+	$(eval $(call export-variable,${variable})))
+
 # Mount other needed volumes
 DOCKER_VOLUMES := ${BUILDDIR} ${DL_DIR} ${SSTATE_DIR}
 
