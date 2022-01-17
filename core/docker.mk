@@ -48,6 +48,15 @@ ifdef DOCKER_GROUPS
  DOCKER_RUN += -e DOCKER_GROUPS=$(subst ${space},${comma},$(strip ${DOCKER_GROUPS}))
 endif
 
+# Bind local ssh configuration and authentication
+DOCKER_RUN += -v ${HOME}/.ssh:/home/docker/.ssh
+
+ifdef SSH_AUTH_SOCK
+ DOCKER_RUN += -v ${SSH_AUTH_SOCK}:/home/docker/.ssh/socket
+ DOCKER_RUN += -e SSH_AUTH_SOCK=/home/docker/.ssh/socket
+ DOCKER_EXPORTED_VARIABLES += SSH_AUTH_SOCK
+endif
+
 # Mount the repo directory as working directory
 DOCKER_RUN += -w ${REPODIR}
 DOCKER_RUN += -v ${REPODIR}:${REPODIR}
