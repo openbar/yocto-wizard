@@ -3,13 +3,11 @@
 # Add docker user and group
 groupadd \
 	--force \
-	--non-unique \
-	--gid ${DOCKER_GID:-911} \
+	${DOCKER_GID:+--non-unique --gid ${DOCKER_GID}} \
 	docker
 
 useradd \
-	--non-unique \
-	--uid ${DOCKER_UID:-911} \
+	${DOCKER_UID:+--non-unique --uid ${DOCKER_UID}} \
 	--gid docker \
 	${DOCKER_GROUPS:+--groups ${DOCKER_GROUPS}} \
 	docker
