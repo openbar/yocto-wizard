@@ -17,7 +17,7 @@ endif
 
 include ${WZDIR}/core/lib/config.mk
 
-DEFCONFIGDIR ?= ${REPODIR}/configs/build
+DEFCONFIGDIR ?= ${REPODIR}/configs/wizard
 
 DEFCONFIG_TARGETS := $(sort $(notdir $(wildcard ${DEFCONFIGDIR}/*_defconfig)))
 
