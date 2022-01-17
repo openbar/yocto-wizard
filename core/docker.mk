@@ -62,12 +62,15 @@ define export-variable
  ifdef ${1}
   ifeq ($(origin ${1}),$(filter $(origin ${1}),environment command line))
    DOCKER_RUN += -e ${1}=${${1}}
+   DOCKER_EXPORTED_VARIABLES += ${1}
   endif
  endif
 endef
 
 $(foreach variable,${DOCKER_EXPORT_VARIABLES},\
 	$(eval $(call export-variable,${variable})))
+
+DOCKER_RUN += -e DOCKER_PRESERVE_ENV=$(subst ${space},${comma},$(strip ${DOCKER_EXPORTED_VARIABLES}))
 
 # Mount other needed volumes
 DOCKER_VOLUMES := ${BUILDDIR} ${DL_DIR} ${SSTATE_DIR}

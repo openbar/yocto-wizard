@@ -19,4 +19,11 @@ useradd \
 	docker
 
 # Execute the command as docker
-su docker --command '"$0" "$@"' -- "$@"
+if which sudo > /dev/null
+then
+	sudo --user docker \
+		${DOCKER_PRESERVE_ENV:+--preserve-env=${DOCKER_PRESERVE_ENV}} \
+		"$@"
+else
+	su docker --command '"$0" "$@"' -- "$@"
+fi
