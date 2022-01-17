@@ -73,7 +73,7 @@ $(foreach variable,${DOCKER_EXPORT_VARIABLES},\
 DOCKER_RUN += -e DOCKER_PRESERVE_ENV=$(subst ${space},${comma},$(strip ${DOCKER_EXPORTED_VARIABLES}))
 
 # Mount other needed volumes
-DOCKER_VOLUMES := ${BUILDDIR} ${DL_DIR} ${SSTATE_DIR}
+override DOCKER_VOLUMES += ${BUILDDIR} ${DL_DIR} ${SSTATE_DIR}
 
 define mount-volume
  ifeq ($(filter ${REPODIR}/%,$(abspath ${1})),)
