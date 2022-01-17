@@ -1,5 +1,11 @@
 #!/bin/sh -e
 
+# Enable verbose
+if [ ${VERBOSE:-0} = 1 ]
+then
+	set -x
+fi
+
 # Add docker user and group
 groupadd \
 	--force \
