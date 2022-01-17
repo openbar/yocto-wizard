@@ -5,7 +5,7 @@ include ${WZDIR}/core/lib/submake.mk
 include ${WZDIR}/core/lib/common.mk
 include ${WZDIR}/core/lib/forward.mk
 
-OE_INIT_BUILD_ENV ?= platform/poky/oe-init-build-env
+OE_INIT_BUILD_ENV ?= ${REPODIR}/platform/poky/oe-init-build-env
 
 BB_EXPORT_VARIABLES := REPODIR BUILDDIR DL_DIR SSTATE_DIR DISTRO MACHINE
 
