@@ -69,6 +69,7 @@ endif
 
 .PHONY: ${DEFCONFIG_TARGETS}
 ${DEFCONFIG_TARGETS}:
+	@echo "Build configured for $@"
 	install -C -m 644 ${DEFCONFIGDIR}/$@ ${CONFIG}
 
 .PHONY: clean
