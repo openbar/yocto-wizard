@@ -9,13 +9,22 @@ endif
 
 export BUILDDIR ?= ${REPODIR}/build
 
+# Support the V= option in command line.
+ifeq ($(origin V),command line)
+ ifneq ($(V),0)
+  VERBOSE := $(V)
+ endif
+endif
+
+export VERBOSE ?= 0
+
+include ${WZDIR}/core/lib/config.mk
+
 HAVE_FOREACH := $(filter foreach,${MAKECMDGOALS})
 
 ifneq (${HAVE_FOREACH},)
  FOREACH_TARGETS := $(filter-out foreach,${MAKECMDGOALS})
 endif
-
-include ${WZDIR}/core/lib/config.mk
 
 DEFCONFIGDIR ?= ${REPODIR}/configs/wizard
 
@@ -33,15 +42,6 @@ ifneq ($(filter-out ${NO_DEFCONFIG_TARGETS},${TARGETS}),)
   $(foreach TARGET,${DEFCONFIG_TARGETS},$(info - ${TARGET}))
  endif
 endif
-
-# Support the V= option in command line.
-ifeq ($(origin V),command line)
- ifneq ($(V),0)
-  VERBOSE := $(V)
- endif
-endif
-
-export VERBOSE ?= 0
 
 include ${WZDIR}/core/lib/common.mk
 
