@@ -26,7 +26,7 @@ ifneq (${HAVE_FOREACH},)
  FOREACH_TARGETS := $(filter-out foreach,${MAKECMDGOALS})
 endif
 
-DEFCONFIGDIR ?= ${REPODIR}/configs/wizard
+DEFCONFIGDIR ?= configs/wizard
 
 DEFCONFIG_TARGETS := $(sort $(notdir $(wildcard ${DEFCONFIGDIR}/*_defconfig)))
 
