@@ -5,6 +5,12 @@ BEGIN				{ ORS = "\v" }
 # Use colon as field separator to extract the targets
 BEGIN				{ FS = ":" }
 
+# Handle makefile error
+/\*\*\*.*Stop\.$/		{ error = $0;
+	                          sub(/.*\*\*\*[[:space:]]+/, "", error);
+	                          sub(/\.[[:space:]]+Stop\.$/, "", error);
+				  exit; }
+
 # Variables are defined in a dedicated section surrounded by blank lines
 /^#[[:space:]]+Variables$/	{ variable_section = 2 }
 /^$/				{ variable_section-- }
@@ -93,11 +99,16 @@ BEGIN				{ FS = ":" }
 
 # The saved targets are printed in a dedicated variable
 END {
-	printf "ALL_TARGETS :=";
+	if (error) {
+		printf "$(error .config: %s)", error;
 
-	for (i in targets) {
-		printf " %s", targets[i];
+	} else {
+		printf "ALL_TARGETS :=";
+
+		for (i in targets) {
+			printf " %s", targets[i];
+		}
+
+		print "";
 	}
-
-	print;
 }

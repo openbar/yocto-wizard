@@ -2,6 +2,12 @@
 # as the new line characters are substituted
 BEGIN				{ ORS = "\v" }
 
+# Handle makefile error
+/\*\*\*.*Stop\.$/		{ error = $0;
+	                          sub(/.*\*\*\*[[:space:]]+/, "", error);
+	                          sub(/\.[[:space:]]+Stop\.$/, "", error);
+				  exit; }
+
 # Explicit targets are defined in the Files section
 /^#[[:space:]]+Files$/		{ target_section = 1 }
 
@@ -36,5 +42,11 @@ BEGIN				{ ORS = "\v" }
 {
 	if (target_section > 0 && !notatarget) {
 		print;
+	}
+}
+
+END {
+	if (error) {
+		printf "$(error .config: %s)", error;
 	}
 }

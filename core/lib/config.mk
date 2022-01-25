@@ -5,7 +5,7 @@ MAKE_AWK += REPODIR=${REPODIR}
 MAKE_AWK += BUILDDIR=${BUILDDIR}
 MAKE_AWK += VERBOSE=${VERBOSE}
 
-run-awk = $(shell ${MAKE_AWK} -npqf ${CONFIG} | awk -f ${WZDIR}/core/lib/${1})
+run-awk = $(shell ${MAKE_AWK} -npqf ${CONFIG} 2>&1 | awk -f ${WZDIR}/core/lib/${1})
 
 empty :=
 
