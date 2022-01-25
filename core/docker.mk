@@ -73,7 +73,7 @@ define export-variable
  endif
 endef
 
-$(foreach variable,${DOCKER_EXPORT_VARIABLES},\
+$(foreach variable,$(sort ${DOCKER_EXPORT_VARIABLES}),\
 	$(eval $(call export-variable,${variable})))
 
 DOCKER_RUN += -e DOCKER_PRESERVE_ENV=$(subst ${space},${comma},$(strip ${DOCKER_EXPORTED_VARIABLES}))
@@ -87,7 +87,8 @@ define mount-volume
  endif
 endef
 
-$(foreach volume,${DOCKER_VOLUMES},$(eval $(call mount-volume,${volume})))
+$(foreach volume,$(sort ${DOCKER_VOLUMES}),\
+	$(eval $(call mount-volume,${volume})))
 
 # Use the previously build image
 DOCKER_RUN += ${DOCKER_TAG}

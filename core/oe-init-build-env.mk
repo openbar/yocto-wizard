@@ -16,7 +16,7 @@ define export-variable
  endif
 endef
 
-$(foreach variable,${BB_EXPORT_VARIABLES},\
+$(foreach variable,$(sort ${BB_EXPORT_VARIABLES}),\
 	$(eval $(call export-variable,${variable})))
 
 .PHONY: .clean-bblayers
