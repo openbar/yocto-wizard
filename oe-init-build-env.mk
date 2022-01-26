@@ -1,9 +1,9 @@
-WZDIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST}))..)
+WZDIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
 
-include ${WZDIR}/core/lib/config.mk
-include ${WZDIR}/core/lib/submake.mk
-include ${WZDIR}/core/lib/common.mk
-include ${WZDIR}/core/lib/forward.mk
+include ${WZDIR}/lib/config.mk
+include ${WZDIR}/lib/submake.mk
+include ${WZDIR}/lib/common.mk
+include ${WZDIR}/lib/forward.mk
 
 OE_INIT_BUILD_ENV ?= platform/poky/oe-init-build-env
 
@@ -26,6 +26,6 @@ $(foreach variable,$(sort ${BB_EXPORT_VARIABLES}),\
 .PHONY: .oe-init-build-env
 .oe-init-build-env: .clean-bblayers
 	${QUIET} . ${OE_INIT_BUILD_ENV} ${BUILDDIR} \
-		&& ${MAKE_FORWARD} -f ${WZDIR}/core/bitbake-layers.mk
+		&& ${MAKE_FORWARD} -f ${WZDIR}/bitbake-layers.mk
 
 .forward: .oe-init-build-env

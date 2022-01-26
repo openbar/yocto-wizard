@@ -1,4 +1,4 @@
-WZDIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST}))..)
+WZDIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
 
 export REPODIR := ${CURDIR}
 
@@ -18,7 +18,7 @@ endif
 
 export VERBOSE ?= 0
 
-include ${WZDIR}/core/lib/config.mk
+include ${WZDIR}/lib/config.mk
 
 HAVE_FOREACH := $(filter foreach,${MAKECMDGOALS})
 
@@ -26,7 +26,7 @@ ifneq (${HAVE_FOREACH},)
  FOREACH_TARGETS := $(filter-out foreach,${MAKECMDGOALS})
 endif
 
-DEFCONFIGDIR ?= configs/wizard
+DEFCONFIGDIR ?= configs
 
 DEFCONFIG_TARGETS := $(sort $(notdir $(wildcard ${DEFCONFIGDIR}/*_defconfig)))
 
@@ -43,7 +43,7 @@ ifneq ($(filter-out ${NO_DEFCONFIG_TARGETS},${TARGETS}),)
  endif
 endif
 
-include ${WZDIR}/core/lib/common.mk
+include ${WZDIR}/lib/common.mk
 
 ifneq (${HAVE_FOREACH},)
  .PHONY: foreach ${FOREACH_TARGETS}
@@ -61,10 +61,10 @@ ifneq (${HAVE_FOREACH},)
 		${MAKE} $${TARGET} && ${MAKE} ${FOREACH_TARGETS}; \
 	done
 else
- include ${WZDIR}/core/lib/forward.mk
+ include ${WZDIR}/lib/forward.mk
 
  .forward:
-	${MAKE_FORWARD} -f ${WZDIR}/core/docker.mk
+	${MAKE_FORWARD} -f ${WZDIR}/docker.mk
 endif
 
 .PHONY: ${DEFCONFIG_TARGETS}

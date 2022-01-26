@@ -1,9 +1,9 @@
-WZDIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST}))..)
+WZDIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
 
-include ${WZDIR}/core/lib/config.mk
-include ${WZDIR}/core/lib/submake.mk
-include ${WZDIR}/core/lib/common.mk
-include ${WZDIR}/core/lib/forward.mk
+include ${WZDIR}/lib/config.mk
+include ${WZDIR}/lib/submake.mk
+include ${WZDIR}/lib/common.mk
+include ${WZDIR}/lib/forward.mk
 
 DOCKERDIR ?= configs/docker
 
@@ -38,7 +38,7 @@ endif
 DOCKER_RUN += --hostname $(subst /,-,${DOCKER_IMAGE})
 
 # Bind local user and group using the docker entrypoint
-DOCKER_RUN += -v ${WZDIR}/core/lib/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh:ro
+DOCKER_RUN += -v ${WZDIR}/lib/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh:ro
 DOCKER_RUN += --entrypoint docker-entrypoint.sh
 
 DOCKER_RUN += -e DOCKER_UID=$$(id -u)
@@ -95,7 +95,7 @@ DOCKER_RUN += ${DOCKER_TAG}
 
 .PHONY: .docker-run
 .docker-run: .docker-build | ${DOCKER_VOLUMES}
-	${DOCKER_RUN} $(call trap,SIGINT,${MAKE_FORWARD} -f ${WZDIR}/core/oe-init-build-env.mk)
+	${DOCKER_RUN} $(call trap,SIGINT,${MAKE_FORWARD} -f ${WZDIR}/oe-init-build-env.mk)
 
 ${DOCKER_VOLUMES}:
 	mkdir -p $@
