@@ -93,7 +93,7 @@ BEGIN				{ FS = ":" }
 
 	# Remaining targets are saved
 	if (target_section > 0 && !notatarget) {
-		targets[i++] = $1;
+		targets[$1]++;
 	}
 }
 
@@ -103,10 +103,10 @@ END {
 		printf "$(error .config: %s)", error;
 
 	} else {
-		printf "ALL_TARGETS :=";
+		printf "ALL_TARGETS := ";
 
-		for (i in targets) {
-			printf " %s", targets[i];
+		for (target in targets) {
+			printf " %s", target;
 		}
 
 		print "";
