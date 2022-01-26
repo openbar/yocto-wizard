@@ -1,11 +1,11 @@
-CONFIG := ${REPODIR}/.config
+CONFIG := ${REPO_DIR}/.config
 
 MAKE_AWK := ${MAKE}
-MAKE_AWK += REPODIR=${REPODIR}
-MAKE_AWK += BUILDDIR=${BUILDDIR}
+MAKE_AWK += REPO_DIR=${REPO_DIR}
+MAKE_AWK += BUILD_DIR=${BUILD_DIR}
 MAKE_AWK += VERBOSE=${VERBOSE}
 
-run-awk = $(shell ${MAKE_AWK} -npqf ${CONFIG} 2>&1 | awk -f ${WZDIR}/lib/${1})
+run-awk = $(shell ${MAKE_AWK} -npqf ${CONFIG} 2>&1 | awk -f ${WIZARD_DIR}/lib/${1})
 
 empty :=
 

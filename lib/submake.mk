@@ -1,11 +1,11 @@
-ifndef REPODIR
- $(error The directory REPODIR must be specified)
-else ifeq ($(realpath ${REPODIR}),)
- $(error The directory REPODIR must exist)
+ifndef REPO_DIR
+ $(error The directory REPO_DIR must be specified)
+else ifeq ($(realpath ${REPO_DIR}),)
+ $(error The directory REPO_DIR must exist)
 endif
 
-ifndef BUILDDIR
- $(error The directory BUILDDIR must be specified)
+ifndef BUILD_DIR
+ $(error The directory BUILD_DIR must be specified)
 endif
 
 ifndef VERBOSE

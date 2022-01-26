@@ -1,24 +1,24 @@
-WZDIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
+WIZARD_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
 
-include ${WZDIR}/lib/config.mk
-include ${WZDIR}/lib/submake.mk
-include ${WZDIR}/lib/common.mk
-include ${WZDIR}/lib/forward.mk
+include ${WIZARD_DIR}/lib/config.mk
+include ${WIZARD_DIR}/lib/submake.mk
+include ${WIZARD_DIR}/lib/common.mk
+include ${WIZARD_DIR}/lib/forward.mk
 
-DOCKERDIR ?= configs/docker
+DOCKER_DIR ?= configs/docker
 
 DOCKER ?= default
-DOCKERFILENAME ?= Dockerfile
-DOCKERCONTEXT ?= ${DOCKERDIR}/${DOCKER}
-DOCKERFILE ?= ${DOCKERCONTEXT}/${DOCKERFILENAME}
+DOCKER_FILENAME ?= Dockerfile
+DOCKER_CONTEXT ?= ${DOCKER_DIR}/${DOCKER}
+DOCKER_FILE ?= ${DOCKER_CONTEXT}/${DOCKER_FILENAME}
 
 DOCKER_IMAGE := ${PROJECT}/${DOCKER}
 DOCKER_TAG := ${DOCKER_IMAGE}:$$(id -u)
 
 DOCKER_BUILD := docker build
 DOCKER_BUILD += -t ${DOCKER_TAG}
-DOCKER_BUILD += -f ${DOCKERFILE}
-DOCKER_BUILD += ${DOCKERCONTEXT}
+DOCKER_BUILD += -f ${DOCKER_FILE}
+DOCKER_BUILD += ${DOCKER_CONTEXT}
 
 .PHONY: .docker-build
 .docker-build:
@@ -38,7 +38,7 @@ endif
 DOCKER_RUN += --hostname $(subst /,-,${DOCKER_IMAGE})
 
 # Bind local user and group using the docker entrypoint
-DOCKER_RUN += -v ${WZDIR}/lib/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh:ro
+DOCKER_RUN += -v ${WIZARD_DIR}/lib/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh:ro
 DOCKER_RUN += --entrypoint docker-entrypoint.sh
 
 DOCKER_RUN += -e DOCKER_UID=$$(id -u)
@@ -58,8 +58,8 @@ ifdef SSH_AUTH_SOCK
 endif
 
 # Mount the repo directory as working directory
-DOCKER_RUN += -w ${REPODIR}
-DOCKER_RUN += -v ${REPODIR}:${REPODIR}
+DOCKER_RUN += -w ${REPO_DIR}
+DOCKER_RUN += -v ${REPO_DIR}:${REPO_DIR}
 
 # Export environment variables
 override DOCKER_EXPORT_VARIABLES += ${DEFAULT_DOCKER_EXPORT_VARIABLES}
@@ -79,10 +79,10 @@ $(foreach variable,$(sort ${DOCKER_EXPORT_VARIABLES}),\
 DOCKER_RUN += -e DOCKER_PRESERVE_ENV=$(subst ${space},${comma},$(strip ${DOCKER_EXPORTED_VARIABLES}))
 
 # Mount other needed volumes
-override DOCKER_VOLUMES += ${BUILDDIR} ${DL_DIR} ${SSTATE_DIR}
+override DOCKER_VOLUMES += ${BUILD_DIR} ${DL_DIR} ${SSTATE_DIR}
 
 define mount-volume
- ifeq ($(filter ${REPODIR}/%,$(abspath ${1})),)
+ ifeq ($(filter ${REPO_DIR}/%,$(abspath ${1})),)
   DOCKER_RUN += -v ${1}:${1}
  endif
 endef
@@ -95,7 +95,7 @@ DOCKER_RUN += ${DOCKER_TAG}
 
 .PHONY: .docker-run
 .docker-run: .docker-build | ${DOCKER_VOLUMES}
-	${DOCKER_RUN} $(call trap,SIGINT,${MAKE_FORWARD} -f ${WZDIR}/oe-init-build-env.mk)
+	${DOCKER_RUN} $(call trap,SIGINT,${MAKE_FORWARD} -f ${WIZARD_DIR}/oe-init-build-env.mk)
 
 ${DOCKER_VOLUMES}:
 	mkdir -p $@

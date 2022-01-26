@@ -1,14 +1,14 @@
-WZDIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
+WIZARD_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
 
-include ${WZDIR}/lib/config.mk
-include ${WZDIR}/lib/submake.mk
-include ${WZDIR}/lib/common.mk
-include ${WZDIR}/lib/forward.mk
+include ${WIZARD_DIR}/lib/config.mk
+include ${WIZARD_DIR}/lib/submake.mk
+include ${WIZARD_DIR}/lib/common.mk
+include ${WIZARD_DIR}/lib/forward.mk
 
 .PHONY: .add-layers
 .add-layers:
-ifneq ($(strip ${BBLAYERS}),)
-	bitbake-layers add-layer -q ${BBLAYERS}
+ifneq ($(strip ${BB_LAYERS}),)
+	bitbake-layers add-layer -q ${BB_LAYERS}
 endif
 
 .PHONY: .validate-layers
@@ -16,4 +16,4 @@ endif
 	bitbake-layers show-layers -q
 
 .forward: .validate-layers
-	${MAKE_FORWARD} -f ${WZDIR}/config.mk
+	${MAKE_FORWARD} -f ${WIZARD_DIR}/config.mk

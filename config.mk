@@ -1,8 +1,8 @@
-WZDIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
+WIZARD_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
 
-include ${WZDIR}/lib/config.mk
-include ${WZDIR}/lib/submake.mk
-include ${WZDIR}/lib/common.mk
+include ${WIZARD_DIR}/lib/config.mk
+include ${WIZARD_DIR}/lib/submake.mk
+include ${WIZARD_DIR}/lib/common.mk
 
 $(call load-targets)
 

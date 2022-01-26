@@ -1,13 +1,13 @@
-WZDIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
+WIZARD_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
 
-export REPODIR := ${CURDIR}
+export REPO_DIR := ${CURDIR}
 
 # Support the O= option in command line.
 ifeq ($(origin O),command line)
- BUILDDIR := $(abspath ${O})
+ BUILD_DIR := $(abspath ${O})
 endif
 
-export BUILDDIR ?= ${REPODIR}/build
+export BUILD_DIR ?= ${REPO_DIR}/build
 
 # Support the V= option in command line.
 ifeq ($(origin V),command line)
@@ -18,7 +18,7 @@ endif
 
 export VERBOSE ?= 0
 
-include ${WZDIR}/lib/config.mk
+include ${WIZARD_DIR}/lib/config.mk
 
 HAVE_FOREACH := $(filter foreach,${MAKECMDGOALS})
 
@@ -26,9 +26,9 @@ ifneq (${HAVE_FOREACH},)
  FOREACH_TARGETS := $(filter-out foreach,${MAKECMDGOALS})
 endif
 
-DEFCONFIGDIR ?= configs
+DEFCONFIG_DIR ?= configs
 
-DEFCONFIG_TARGETS := $(sort $(notdir $(wildcard ${DEFCONFIGDIR}/*_defconfig)))
+DEFCONFIG_TARGETS := $(sort $(notdir $(wildcard ${DEFCONFIG_DIR}/*_defconfig)))
 
 TARGETS := $(if $(MAKECMDGOALS),$(MAKECMDGOALS),all)
 
@@ -43,7 +43,7 @@ ifneq ($(filter-out ${NO_DEFCONFIG_TARGETS},${TARGETS}),)
  endif
 endif
 
-include ${WZDIR}/lib/common.mk
+include ${WIZARD_DIR}/lib/common.mk
 
 ifneq (${HAVE_FOREACH},)
  .PHONY: foreach ${FOREACH_TARGETS}
@@ -61,20 +61,20 @@ ifneq (${HAVE_FOREACH},)
 		${MAKE} $${TARGET} && ${MAKE} ${FOREACH_TARGETS}; \
 	done
 else
- include ${WZDIR}/lib/forward.mk
+ include ${WIZARD_DIR}/lib/forward.mk
 
  .forward:
-	${MAKE_FORWARD} -f ${WZDIR}/docker.mk
+	${MAKE_FORWARD} -f ${WIZARD_DIR}/docker.mk
 endif
 
 .PHONY: ${DEFCONFIG_TARGETS}
 ${DEFCONFIG_TARGETS}:
 	@echo "Build configured for $@"
-	install -C -m 644 ${DEFCONFIGDIR}/$@ ${CONFIG}
+	install -C -m 644 ${DEFCONFIG_DIR}/$@ ${CONFIG}
 
 .PHONY: clean
 clean:
-	rm -rf ${BUILDDIR}
+	rm -rf ${BUILD_DIR}
 
 .PHONY: help
 help::
