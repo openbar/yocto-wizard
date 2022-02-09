@@ -1,31 +1,47 @@
+# The oe-init-build-env layer.
+#
+# The oe-init-build-env layer is responsible for:
+# - exporting the required variables to bitbake.
+# - cleaning the bitbake layer configuration.
+# - initializing the bitbake environment.
+
+# The wizard directory. This must be done before any includes.
 WIZARD_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
 
-include ${WIZARD_DIR}/lib/config.mk
-include ${WIZARD_DIR}/lib/submake.mk
-include ${WIZARD_DIR}/lib/common.mk
-include ${WIZARD_DIR}/lib/forward.mk
+# Include the common makefiles.
+include ${WIZARD_DIR}/includes/verify-environment.mk
+include ${WIZARD_DIR}/includes/common.mk
 
-OE_INIT_BUILD_ENV ?= platform/poky/oe-init-build-env
+# Load the configuration variables and targets.
+ifeq ($(realpath ${CONFIG}),)
+  $(error Configuration file not found)
+else
+  $(call config-load-variables)
+endif
 
-override BB_EXPORT_VARIABLES += ${DEFAULT_BB_EXPORT_VARIABLES}
+# Export the required variables to bitbake.
+override BB_EXPORT_VARIABLES += REPO_DIR BUILD_DIR VERBOSE
+override BB_EXPORT_VARIABLES += DL_DIR SSTATE_DIR DISTRO MACHINE
 
 define export-variable
- ifdef ${1}
-  export ${1}
-  export BB_ENV_EXTRAWHITE += ${1}
- endif
+  ifdef ${1}
+    export ${1}
+    export BB_ENV_EXTRAWHITE += ${1}
+  endif
 endef
 
-$(foreach variable,$(sort ${BB_EXPORT_VARIABLES}),\
-	$(eval $(call export-variable,${variable})))
+$(call foreach-eval,${BB_EXPORT_VARIABLES},export-variable)
 
+# All targets are forwarded to the bitbake-layers layer.
+${ALL_TARGETS}: .forward
+
+.PHONY: .forward
+.forward: .clean-bblayers
+	${QUIET} . ${OE_INIT_BUILD_ENV} ${BUILD_DIR} \
+		&& ${MAKE} -f ${WIZARD_DIR}/bitbake-layers.mk ${MAKECMDGOALS}
+
+# The configuration of the bitbake layers must be removed. It will then be
+# rebuilt each time by the following bitbake-layers layer.
 .PHONY: .clean-bblayers
 .clean-bblayers:
 	rm -f ${BUILD_DIR}/conf/bblayers.conf
-
-.PHONY: .oe-init-build-env
-.oe-init-build-env: .clean-bblayers
-	${QUIET} . ${OE_INIT_BUILD_ENV} ${BUILD_DIR} \
-		&& ${MAKE_FORWARD} -f ${WIZARD_DIR}/bitbake-layers.mk
-
-.forward: .oe-init-build-env

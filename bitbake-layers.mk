@@ -1,19 +1,36 @@
+# The bitbake-layers layer.
+#
+# The bitbake-layers layer is responsible for:
+# - adding the required bitbake layers.
+# - validating the configured bitbake layers.
+
+# The wizard directory. This must be done before any includes.
 WIZARD_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
 
-include ${WIZARD_DIR}/lib/config.mk
-include ${WIZARD_DIR}/lib/submake.mk
-include ${WIZARD_DIR}/lib/common.mk
-include ${WIZARD_DIR}/lib/forward.mk
+# Include the common makefiles.
+include ${WIZARD_DIR}/includes/verify-environment.mk
+include ${WIZARD_DIR}/includes/common.mk
 
-.PHONY: .add-layers
-.add-layers:
+# Load the configuration variables and targets.
+ifeq ($(realpath ${CONFIG}),)
+  $(error Configuration file not found)
+else
+  $(call config-load-variables)
+endif
+
+# All targets are forwarded to the config layer.
+${ALL_TARGETS}: .forward
+
+.PHONY: .forward
+.forward: .validate-bitbake-layers
+	${MAKE} -f ${WIZARD_DIR}/config.mk ${MAKECMDGOALS}
+
+.PHONY: .validate-bitbake-layers
+.validate-bitbake-layers: .add-bitbake-layers
+	bitbake-layers show-layers -q
+
+.PHONY: .add-bitbake-layers
+.add-bitbake-layers:
 ifneq ($(strip ${BB_LAYERS}),)
 	bitbake-layers add-layer -q ${BB_LAYERS}
 endif
-
-.PHONY: .validate-layers
-.validate-layers: .add-layers
-	bitbake-layers show-layers -q
-
-.forward: .validate-layers
-	${MAKE_FORWARD} -f ${WIZARD_DIR}/config.mk

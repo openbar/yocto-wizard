@@ -1,34 +1,38 @@
 # Use a special output separator to let make(1) evaluate the output
-# as the new line characters are substituted
+# as the new line characters are substituted.
 BEGIN				{ ORS = "\v" }
 
-# Use colon as field separator to extract the targets
+# Remove the separators between the printed strings and manage the spacing
+# manually.
+BEGIN				{ OFS = "" }
+
+# Use colon as field separator to extract the targets.
 BEGIN				{ FS = ":" }
 
-# Handle makefile error
+# Handle makefile errors.
 /\*\*\*.*Stop\.$/		{ error = $0;
 	                          sub(/.*\*\*\*[[:space:]]+/, "", error);
 	                          sub(/\.[[:space:]]+Stop\.$/, "", error);
 				  exit; }
 
-# Variables are defined in a dedicated section surrounded by blank lines
+# Variables are defined in a dedicated section surrounded by blank lines.
 /^#[[:space:]]+Variables$/	{ variable_section = 2 }
 /^$/				{ variable_section-- }
 
-# Only explicit variables are valid
+# Only explicit variables are valid.
 /^#[[:space:]]+makefile \(from '[[:print:]]+', line [[:digit:]]+\)$/	{ variable = 1 }
 
-# Explicit targets are defined in the Files section
+# Explicit targets are defined in the Files section.
 /^#[[:space:]]+Files$/		{ target_section = 1 }
 
-# Not a target blocks are ignored
+# Not a target blocks are ignored.
 /^#[[:space:]]+Not a target:$/	{ notatarget = 1 }
 /^$/				{ notatarget = 0 }
 
-# Comments and blank lines are skipped
+# Comments and blank lines are skipped.
 /^#/ || /^$/			{ next }
 
-# Special variables are ignored
+# Special variables are ignored.
 /^\.DEFAULT_GOAL/		|| \
 /^\.EXTRA_PREREQS/		|| \
 /^\.FEATURES/			|| \
@@ -59,7 +63,7 @@ BEGIN				{ FS = ":" }
 /^SUFFIXES/			|| \
 /^VPATH/			{ variable = 0 }
 
-# Special targets are ignored
+# Special targets are ignored.
 /^\.PHONY:/			|| \
 /^\.SUFFIXES:/			|| \
 /^\.DEFAULT:/			|| \
@@ -76,31 +80,40 @@ BEGIN				{ FS = ":" }
 /^\.ONESHELL:/			|| \
 /^\.POSIX:/			{ notatarget = 1 }
 
-# Internal targets are ignored
+# Internal targets are ignored.
+/^[:print:]*_defconfig:/	|| \
+/^clean:/			|| \
+/^foreach:/			|| \
+/^help:/			|| \
 /^shell:/			{ notatarget = 1 }
 
-# Recipes are skipped
+# Recipes are skipped.
 /^\t/				{ next }
 
 {
-	# Remaining variables are printed
+	# Remaining variables are printed.
 	if (variable_section > 0 && variable) {
 		print;
 	}
 
-	# The next variable must be validated again
+	# The next variable must be validated again.
 	variable = 0;
 
-	# Remaining targets are saved
+	# Remaining targets are saved.
 	if (target_section > 0 && !notatarget) {
 		targets[$1]++;
 	}
 }
 
-# The saved targets are printed in a dedicated variable
+# The saved targets are printed in a dedicated variable if no errors where
+# detected.
 END {
 	if (error) {
-		printf "$(error .config: %s)", error;
+		print "ifdef CONFIG_IGNORE_ERROR";
+		print "  CONFIG_ERROR := ", error;
+		print "else"
+		print "  $(error .config: ", error, ")";
+		print "endif";
 
 	} else {
 		printf "ALL_TARGETS := ";

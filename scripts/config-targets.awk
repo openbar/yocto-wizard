@@ -1,24 +1,18 @@
 # Use a special output separator to let make(1) evaluate the output
-# as the new line characters are substituted
+# as the new line characters are substituted.
 BEGIN				{ ORS = "\v" }
 
-# Handle makefile error
-/\*\*\*.*Stop\.$/		{ error = $0;
-	                          sub(/.*\*\*\*[[:space:]]+/, "", error);
-	                          sub(/\.[[:space:]]+Stop\.$/, "", error);
-				  exit; }
-
-# Explicit targets are defined in the Files section
+# Explicit targets are defined in the Files section.
 /^#[[:space:]]+Files$/		{ target_section = 1 }
 
-# Not a target blocks are ignored
+# Not a target blocks are ignored.
 /^#[[:space:]]+Not a target:$/	{ notatarget = 1 }
 /^$/				{ notatarget = 0 }
 
-# Comments and blank lines are skipped
+# Comments and blank lines are skipped.
 /^#/ || /^$/			{ next }
 
-# Special targets are ignored
+# Special targets are ignored.
 /^\.PHONY:/			|| \
 /^\.SUFFIXES:/			|| \
 /^\.DEFAULT:/			|| \
@@ -35,18 +29,16 @@ BEGIN				{ ORS = "\v" }
 /^\.ONESHELL:/			|| \
 /^\.POSIX:/			{ notatarget = 1 }
 
-# Internal targets are ignored
+# Internal targets are ignored.
+/^[:print:]*_defconfig:/	|| \
+/^clean:/			|| \
+/^foreach:/			|| \
+/^help:/			|| \
 /^shell:/			{ notatarget = 1 }
 
-# Remaining blocks are printed
+# Remaining blocks are printed.
 {
 	if (target_section > 0 && !notatarget) {
 		print;
-	}
-}
-
-END {
-	if (error) {
-		printf "$(error .config: %s)", error;
 	}
 }

@@ -1,10 +1,26 @@
+# The configuration layer. This layer is the last one.
+#
+# The environment is fully set up and the last thing to do is to parse the
+# configuration file including targets, so they can be called.
+#
+# The shell target is added to allow access to the build environment for debug
+# and development purpose.
+
+# The wizard directory. This must be done before any includes.
 WIZARD_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
 
-include ${WIZARD_DIR}/lib/config.mk
-include ${WIZARD_DIR}/lib/submake.mk
-include ${WIZARD_DIR}/lib/common.mk
+# Include the common makefiles.
+include ${WIZARD_DIR}/includes/verify-environment.mk
+include ${WIZARD_DIR}/includes/common.mk
 
-$(call load-targets)
+# Load the configuration variables and targets.
+ifeq ($(realpath ${CONFIG}),)
+  $(error Configuration file not found)
+else
+  $(call config-load-variables)
+  $(call config-load-targets)
+endif
 
+# Add the "shell" target.
 shell:
 	${SHELL}
