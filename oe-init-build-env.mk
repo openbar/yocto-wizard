@@ -19,6 +19,9 @@ else
   $(call config-load-variables)
 endif
 
+# The bitbake variable used to export environment variables to bitbake.
+BB_EXPORT_LIST_VARIABLE ?= BB_ENV_PASSTHROUGH_ADDITIONS
+
 # Export the required variables to bitbake.
 override BB_EXPORT_VARIABLES += REPO_DIR BUILD_DIR VERBOSE
 override BB_EXPORT_VARIABLES += DL_DIR SSTATE_DIR DISTRO MACHINE
@@ -26,7 +29,7 @@ override BB_EXPORT_VARIABLES += DL_DIR SSTATE_DIR DISTRO MACHINE
 define export-variable
   ifdef ${1}
     export ${1}
-    export BB_ENV_EXTRAWHITE += ${1}
+    export ${BB_EXPORT_LIST_VARIABLE} += ${1}
   endif
 endef
 
