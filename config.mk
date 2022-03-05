@@ -6,12 +6,12 @@
 # The shell target is added to allow access to the build environment for debug
 # and development purpose.
 
-# The wizard directory. This must be done before any includes.
-WIZARD_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
+# The openbar directory. This must be done before any includes.
+OPENBAR_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
 
 # Include the common makefiles.
-include ${WIZARD_DIR}/includes/verify-environment.mk
-include ${WIZARD_DIR}/includes/common.mk
+include ${OPENBAR_DIR}/includes/verify-environment.mk
+include ${OPENBAR_DIR}/includes/common.mk
 
 # Load the configuration variables and targets.
 ifeq ($(realpath ${CONFIG}),)

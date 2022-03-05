@@ -8,12 +8,12 @@
 # - binding the local user and group.
 # - binding the local ssh configuration.
 
-# The wizard directory. This must be done before any includes.
-WIZARD_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
+# The openbar directory. This must be done before any includes.
+OPENBAR_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
 
 # Include the common makefiles.
-include ${WIZARD_DIR}/includes/verify-environment.mk
-include ${WIZARD_DIR}/includes/common.mk
+include ${OPENBAR_DIR}/includes/verify-environment.mk
+include ${OPENBAR_DIR}/includes/common.mk
 
 # Load the configuration variables.
 ifeq ($(realpath ${CONFIG}),)
@@ -24,7 +24,7 @@ endif
 
 ## docker-sanitize <string>
 # Sanitize a string to be used as a docker name or tag.
-docker-sanitize = $(shell echo ${1} | awk -f ${WIZARD_DIR}/scripts/docker-sanitize.awk)
+docker-sanitize = $(shell echo ${1} | awk -f ${OPENBAR_DIR}/scripts/docker-sanitize.awk)
 
 ## comma-list <list>
 # Convert a space separated list to a comma separated list.
@@ -62,7 +62,7 @@ endif
 DOCKER_RUN += --hostname $(subst /,-,${DOCKER_IMAGE})
 
 # Bind the local user and group using the docker entrypoint.
-DOCKER_RUN += -v ${WIZARD_DIR}/scripts/docker-entrypoint.sh:/sbin/docker-entrypoint.sh:ro
+DOCKER_RUN += -v ${OPENBAR_DIR}/scripts/docker-entrypoint.sh:/sbin/docker-entrypoint.sh:ro
 DOCKER_RUN += --entrypoint docker-entrypoint.sh
 
 DOCKER_RUN += -e DOCKER_UID=$$(id -u)
@@ -127,7 +127,7 @@ ${ALL_TARGETS}: .forward
 .forward: .docker-build | ${DOCKER_VOLUMES}
 	${DOCKER_RUN} ${SHELL} -c " \
 		trap - SIGINT; \
-		${MAKE} -f ${WIZARD_DIR}/oe-init-build-env.mk ${MAKECMDGOALS}"
+		${MAKE} -f ${OPENBAR_DIR}/oe-init-build-env.mk ${MAKECMDGOALS}"
 
 .PHONY: .docker-build
 .docker-build:

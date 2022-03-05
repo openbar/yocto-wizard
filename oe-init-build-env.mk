@@ -5,12 +5,12 @@
 # - cleaning the bitbake layer configuration.
 # - initializing the bitbake environment.
 
-# The wizard directory. This must be done before any includes.
-WIZARD_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
+# The openbar directory. This must be done before any includes.
+OPENBAR_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
 
 # Include the common makefiles.
-include ${WIZARD_DIR}/includes/verify-environment.mk
-include ${WIZARD_DIR}/includes/common.mk
+include ${OPENBAR_DIR}/includes/verify-environment.mk
+include ${OPENBAR_DIR}/includes/common.mk
 
 # Load the configuration variables and targets.
 ifeq ($(realpath ${CONFIG}),)
@@ -41,7 +41,7 @@ ${ALL_TARGETS}: .forward
 .PHONY: .forward
 .forward: .clean-bblayers
 	${QUIET} . ${OE_INIT_BUILD_ENV} ${BUILD_DIR} \
-		&& ${MAKE} -f ${WIZARD_DIR}/bitbake-layers.mk ${MAKECMDGOALS}
+		&& ${MAKE} -f ${OPENBAR_DIR}/bitbake-layers.mk ${MAKECMDGOALS}
 
 # The configuration of the bitbake layers must be removed. It will then be
 # rebuilt each time by the following bitbake-layers layer.

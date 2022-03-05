@@ -8,7 +8,7 @@ MAKEFLAGS += --no-print-directory
 .PHONY: all
 all:
 
-# Keep the wizard silent if requested.
+# Keep the openbar silent if requested.
 ifeq (${VERBOSE}, 0)
   MAKEFLAGS += --silent
   QUIET := >/dev/null
@@ -83,7 +83,7 @@ config-parse = $(subst ${VERTICALTAB},${NEWLINE},\
 #
 # The AUTO_TARGETS are added as dependencies of the "all" target.
 define config-load-variables-noeval
-  $(call config-parse,${WIZARD_DIR}/scripts/config-variables.awk)
+  $(call config-parse,${OPENBAR_DIR}/scripts/config-variables.awk)
 
   ALL_TARGETS += shell
   MANUAL_TARGETS += shell
@@ -100,7 +100,7 @@ config-load-variables = $(eval $(call config-load-variables-noeval))
 ## config-load-targets
 # Load the targets from the configuration (and not the variables).
 define config-load-targets-noeval
-  $(call config-parse,${WIZARD_DIR}/scripts/config-targets.awk)
+  $(call config-parse,${OPENBAR_DIR}/scripts/config-targets.awk)
 endef
 
 config-load-targets = $(eval $(call config-load-targets-noeval))

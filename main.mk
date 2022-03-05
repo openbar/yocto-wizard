@@ -7,8 +7,8 @@
 # - handling the special "foreach" target.
 # - forwarding the other targets to the docker layer.
 
-# The wizard directory. This must be done before any includes.
-WIZARD_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
+# The openbar directory. This must be done before any includes.
+OPENBAR_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
 
 # The base directory where the root makefile is located.
 export REPO_DIR := ${CURDIR}
@@ -31,7 +31,7 @@ export VERBOSE ?= 0
 
 # All the required variables have been set.
 # The common makefile can now be included.
-include ${WIZARD_DIR}/includes/common.mk
+include ${OPENBAR_DIR}/includes/common.mk
 
 # Check if the "foreach" special target is used.
 HAVE_FOREACH := $(filter foreach,${MAKECMDGOALS})
@@ -96,7 +96,7 @@ else
 
       .PHONY: .forward
       .forward:
-	${MAKE} -f ${WIZARD_DIR}/docker.mk ${MAKECMDGOALS}
+	${MAKE} -f ${OPENBAR_DIR}/docker.mk ${MAKECMDGOALS}
     endif
   endif
 endif

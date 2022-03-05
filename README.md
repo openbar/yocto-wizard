@@ -1,6 +1,6 @@
 # OpenBar build system for Yocto projects
 
-The `yocto-wizard` is an implementation of the OpenBar build system for Yocto
+The `yocto-openbar` is an implementation of the OpenBar build system for Yocto
 projects. It follows the guidelines specified by the OpenBar project to build
 a Yocto project in an easy, repeatable and unambiguous way.
 
@@ -44,11 +44,11 @@ a Yocto project in an easy, repeatable and unambiguous way.
 ## Further Reading
 
 For more information about the OpenBar project, the use and specifications of
-the `yocto-wizard`, to discover other project templates and examples, please
+the `yocto-openbar`, to discover other project templates and examples, please
 visit the project documentation:
 
 > https://openbar.github.io
 
 ## License
 
-The `yocto-wizard` is released under the [MIT License](LICENSE.md).
+The `yocto-openbar` is released under the [MIT License](LICENSE.md).
