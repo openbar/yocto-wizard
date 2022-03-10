@@ -1,13 +1,12 @@
-# OpenBar build system for Yocto projects
+# OpenBar build system
 
-The `yocto-openbar` is an implementation of the OpenBar build system for Yocto
-projects. It follows the guidelines specified by the OpenBar project to build
-a Yocto project in an easy, repeatable and unambiguous way.
+The `openbar` build system is used to enhance reproducible builds for your
+project by providing deterministic and immutable environments.
 
 ## Features
 
-* The configuration and build are performed with a minimum number of actions to
-  eliminate any possible errors:
+* The configuration and build are performed with a minimal and unambiguous
+  number of actions to eliminate any possible errors:
 
   ```bash
   make myconfig_defconfig
@@ -32,23 +31,25 @@ a Yocto project in an easy, repeatable and unambiguous way.
 * Although the final user interface is quite restrictive, the project
   configuration is very flexible and has some powerful features:
 
+  * Configurable project type (standard, yocto).
+
   * Configurable project path (defconfig files, docker files, poky).
 
-  * Configuration files use a makefile syntax that allows to easily use some
+  * Config files use a makefile syntax that allows to easily use some
     features like target dependencies, file inclusion, default variable
     assignment, etc ...
 
-  * Developers can easily access the Yocto environment with the `make shell`
+  * Developers can easily access the build environment with the `make shell`
     command.
 
 ## Further Reading
 
-For more information about the OpenBar project, the use and specifications of
-the `yocto-openbar`, to discover other project templates and examples, please
-visit the project documentation:
+For more information about the OpenBar project, the specifications of
+the `openbar` build system, and to discover some examples, please visit
+the project documentation:
 
 > https://openbar.github.io
 
 ## License
 
-The `yocto-openbar` is released under the [MIT License](LICENSE.md).
+The `openbar` build system is released under the [MIT License](LICENSE.md).
