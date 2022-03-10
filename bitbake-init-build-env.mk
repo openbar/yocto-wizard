@@ -20,31 +20,31 @@ else
 endif
 
 # The bitbake variable used to export environment variables to bitbake.
-BB_EXPORT_LIST_VARIABLE ?= BB_ENV_PASSTHROUGH_ADDITIONS
+OB_BB_EXPORT_LIST_VARIABLE ?= BB_ENV_PASSTHROUGH_ADDITIONS
 
 # Export the required variables to bitbake.
-override BB_EXPORT_VARIABLES += REPO_DIR BUILD_DIR VERBOSE
-override BB_EXPORT_VARIABLES += DL_DIR SSTATE_DIR DISTRO MACHINE
+override OB_BB_EXPORT_VARIABLES += OB_ROOT_DIR OB_BUILD_DIR OB_VERBOSE
+override OB_BB_EXPORT_VARIABLES += DL_DIR SSTATE_DIR DISTRO MACHINE
 
 define export-variable
   ifdef ${1}
     export ${1}
-    export ${BB_EXPORT_LIST_VARIABLE} += ${1}
+    export ${OB_BB_EXPORT_LIST_VARIABLE} += ${1}
   endif
 endef
 
-$(call foreach-eval,${BB_EXPORT_VARIABLES},export-variable)
+$(call foreach-eval,${OB_BB_EXPORT_VARIABLES},export-variable)
 
 # All targets are forwarded to the bitbake-layers layer.
-${ALL_TARGETS}: .forward
+${OB_ALL_TARGETS}: .forward
 
 .PHONY: .forward
 .forward: .clean-bblayers
-	${QUIET} . ${OE_INIT_BUILD_ENV} ${BUILD_DIR} \
+	${QUIET} . ${OB_BB_INIT_BUILD_ENV} ${OB_BUILD_DIR} \
 		&& ${MAKE} -f ${OPENBAR_DIR}/bitbake-layers.mk ${MAKECMDGOALS}
 
 # The configuration of the bitbake layers must be removed. It will then be
 # rebuilt each time by the following bitbake-layers layer.
 .PHONY: .clean-bblayers
 .clean-bblayers:
-	rm -f ${BUILD_DIR}/conf/bblayers.conf
+	rm -f ${OB_BUILD_DIR}/conf/bblayers.conf

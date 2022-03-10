@@ -11,23 +11,23 @@
 OPENBAR_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
 
 # The base directory where the root makefile is located.
-export REPO_DIR := ${CURDIR}
+export OB_ROOT_DIR := ${CURDIR}
 
 # Support the O= option in command line.
 ifeq ($(origin O),command line)
-  BUILD_DIR := $(abspath ${O})
+  OB_BUILD_DIR := $(abspath ${O})
 endif
 
-export BUILD_DIR ?= ${REPO_DIR}/build
+export OB_BUILD_DIR ?= ${OB_ROOT_DIR}/build
 
 # Support the V= option in command line.
 ifeq ($(origin V),command line)
   ifneq ($(V),0)
-    VERBOSE := $(V)
+    OB_VERBOSE := $(V)
   endif
 endif
 
-export VERBOSE ?= 0
+export OB_VERBOSE ?= 0
 
 # All the required variables have been set.
 # The common makefile can now be included.
@@ -41,7 +41,7 @@ ifneq (${HAVE_FOREACH},)
 endif
 
 # Get the default configuration targets.
-DEFCONFIG_TARGETS := $(sort $(notdir $(wildcard ${DEFCONFIG_DIR}/*_defconfig)))
+DEFCONFIG_TARGETS := $(sort $(notdir $(wildcard ${OB_DEFCONFIG_DIR}/*_defconfig)))
 
 # The targets that do not require to have a configuration file.
 NO_CONFIG_TARGETS := ${DEFCONFIG_TARGETS} clean foreach ${FOREACH_TARGETS} help
@@ -91,8 +91,8 @@ ifneq (${HAVE_FOREACH},)
 else
   # All configuration targets are forwarded to the docker layer.
   ifndef CONFIG_ERROR
-    ifneq (${ALL_TARGETS},)
-      ${ALL_TARGETS}: .forward
+    ifneq (${OB_ALL_TARGETS},)
+      ${OB_ALL_TARGETS}: .forward
 
       .PHONY: .forward
       .forward:
@@ -105,12 +105,12 @@ endif
 .PHONY: ${DEFCONFIG_TARGETS}
 ${DEFCONFIG_TARGETS}:
 	@echo "Build configured for $@"
-	install -C -m 644 ${DEFCONFIG_DIR}/$@ ${CONFIG}
+	install -C -m 644 ${OB_DEFCONFIG_DIR}/$@ ${CONFIG}
 
 # The "clean" target.
 .PHONY: clean
 clean:
-	rm -rf ${BUILD_DIR}
+	rm -rf ${OB_BUILD_DIR}
 
 # The "help" target.
 .PHONY: help
@@ -123,11 +123,11 @@ ifeq ($(realpath ${CONFIG}),)
 	@echo '  Not yet configured'
 else ifdef CONFIG_ERROR
 	@echo '  Configuration error: ${CONFIG_ERROR}'
-else ifeq (${ALL_TARGETS},)
+else ifeq (${OB_ALL_TARGETS},)
 	@echo '  No command defined'
 else
-	@$(foreach target,${AUTO_TARGETS},echo '* ${target}';)
-	@$(foreach target,${MANUAL_TARGETS},echo '  ${target}';)
+	@$(foreach target,${OB_AUTO_TARGETS},echo '* ${target}';)
+	@$(foreach target,${OB_MANUAL_TARGETS},echo '  ${target}';)
 endif
 	@echo
 	@echo 'Configuration targets:'

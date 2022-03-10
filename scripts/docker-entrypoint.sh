@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
 # Enable verbose
-if [ ${VERBOSE:-0} = 1 ]
+if [ ${OB_VERBOSE:-0} = 1 ]
 then
 	set -x
 fi
@@ -9,20 +9,20 @@ fi
 # Add docker user and group
 groupadd \
 	--force \
-	${DOCKER_GID:+--non-unique --gid ${DOCKER_GID}} \
+	${OB_DOCKER_GID:+--non-unique --gid ${OB_DOCKER_GID}} \
 	docker
 
 useradd \
-	${DOCKER_UID:+--non-unique --uid ${DOCKER_UID}} \
+	${OB_DOCKER_UID:+--non-unique --uid ${OB_DOCKER_UID}} \
 	--gid docker \
-	${DOCKER_GROUPS:+--groups ${DOCKER_GROUPS}} \
+	${OB_DOCKER_GROUPS:+--groups ${OB_DOCKER_GROUPS}} \
 	docker
 
 # Execute the command as docker
 if which sudo > /dev/null
 then
 	sudo --user docker \
-		${DOCKER_PRESERVE_ENV:+--preserve-env=${DOCKER_PRESERVE_ENV}} \
+		${OB_DOCKER_PRESERVE_ENV:+--preserve-env=${OB_DOCKER_PRESERVE_ENV}} \
 		"$@"
 else
 	su docker --command '"$0" "$@"' -- "$@"

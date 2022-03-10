@@ -19,7 +19,7 @@ else
 endif
 
 # All targets are forwarded to the config layer.
-${ALL_TARGETS}: .forward
+${OB_ALL_TARGETS}: .forward
 
 .PHONY: .forward
 .forward: .validate-bitbake-layers
@@ -31,6 +31,6 @@ ${ALL_TARGETS}: .forward
 
 .PHONY: .add-bitbake-layers
 .add-bitbake-layers:
-ifneq ($(strip ${BB_LAYERS}),)
-	bitbake-layers add-layer -q ${BB_LAYERS}
+ifneq ($(strip ${OB_BB_LAYERS}),)
+	bitbake-layers add-layer -q ${OB_BB_LAYERS}
 endif

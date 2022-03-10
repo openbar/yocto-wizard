@@ -31,21 +31,21 @@ docker-sanitize = $(shell echo ${1} | awk -f ${OPENBAR_DIR}/scripts/docker-sanit
 comma-list = $(subst ${SPACE},${COMMA},$(strip ${1}))
 
 # The default docker configuration.
-DOCKER          ?= default
-DOCKER_FILENAME ?= Dockerfile
-DOCKER_CONTEXT  ?= ${DOCKER_DIR}/${DOCKER}
-DOCKER_FILE     ?= ${DOCKER_CONTEXT}/${DOCKER_FILENAME}
+OB_DOCKER          ?= default
+OB_DOCKER_FILENAME ?= Dockerfile
+OB_DOCKER_CONTEXT  ?= ${OB_DOCKER_DIR}/${OB_DOCKER}
+OB_DOCKER_FILE     ?= ${OB_DOCKER_CONTEXT}/${OB_DOCKER_FILENAME}
 
 # The generated docker variables.
-DOCKER_PROJECT := $(call docker-sanitize,$(notdir ${REPO_DIR}))
-DOCKER_IMAGE   := ${DOCKER_PROJECT}/$(call docker-sanitize,${DOCKER})
+DOCKER_PROJECT := $(call docker-sanitize,$(notdir ${OB_ROOT_DIR}))
+DOCKER_IMAGE   := ${DOCKER_PROJECT}/$(call docker-sanitize,${OB_DOCKER})
 DOCKER_TAG     := ${DOCKER_IMAGE}:$(call docker-sanitize,${USER})
 
 # The "docker build" command line.
 DOCKER_BUILD := docker build
 DOCKER_BUILD += -t ${DOCKER_TAG}
-DOCKER_BUILD += -f ${DOCKER_FILE}
-DOCKER_BUILD += ${DOCKER_CONTEXT}
+DOCKER_BUILD += -f ${OB_DOCKER_FILE}
+DOCKER_BUILD += ${OB_DOCKER_CONTEXT}
 
 # The "docker run" command line.
 DOCKER_RUN := docker run
@@ -65,11 +65,11 @@ DOCKER_RUN += --hostname $(subst /,-,${DOCKER_IMAGE})
 DOCKER_RUN += -v ${OPENBAR_DIR}/scripts/docker-entrypoint.sh:/sbin/docker-entrypoint.sh:ro
 DOCKER_RUN += --entrypoint docker-entrypoint.sh
 
-DOCKER_RUN += -e DOCKER_UID=$$(id -u)
-DOCKER_RUN += -e DOCKER_GID=$$(id -g)
+DOCKER_RUN += -e OB_DOCKER_UID=$$(id -u)
+DOCKER_RUN += -e OB_DOCKER_GID=$$(id -g)
 
-ifdef DOCKER_GROUPS
-  DOCKER_RUN += -e DOCKER_GROUPS=$(call comma-list,${DOCKER_GROUPS})
+ifdef OB_DOCKER_GROUPS
+  DOCKER_RUN += -e OB_DOCKER_GROUPS=$(call comma-list,${OB_DOCKER_GROUPS})
 endif
 
 # Bind the local ssh configuration and authentication.
@@ -82,16 +82,16 @@ ifdef SSH_AUTH_SOCK
 endif
 
 # Mount the repo directory as working directory.
-DOCKER_RUN += -w ${REPO_DIR}
-DOCKER_RUN += -v ${REPO_DIR}:${REPO_DIR}
+DOCKER_RUN += -w ${OB_ROOT_DIR}
+DOCKER_RUN += -v ${OB_ROOT_DIR}:${OB_ROOT_DIR}
 
 # Export the required environment variables.
-override DOCKER_EXPORT_VARIABLES += REPO_DIR BUILD_DIR VERBOSE
-override DOCKER_EXPORT_VARIABLES += DEFCONFIG_DIR DOCKER_DIR OE_INIT_BUILD_ENV
-override DOCKER_EXPORT_VARIABLES += BB_EXPORT_LIST_VARIABLE
-override DOCKER_EXPORT_VARIABLES += BB_EXPORT_VARIABLES ${BB_EXPORT_VARIABLES}
-override DOCKER_EXPORT_VARIABLES += BB_LAYERS
-override DOCKER_EXPORT_VARIABLES += DL_DIR SSTATE_DIR DISTRO MACHINE
+override OB_DOCKER_EXPORT_VARIABLES += OB_ROOT_DIR OB_BUILD_DIR OB_VERBOSE
+override OB_DOCKER_EXPORT_VARIABLES += OB_DEFCONFIG_DIR OB_DOCKER_DIR OB_BB_INIT_BUILD_ENV
+override OB_DOCKER_EXPORT_VARIABLES += OB_BB_EXPORT_LIST_VARIABLE
+override OB_DOCKER_EXPORT_VARIABLES += OB_BB_EXPORT_VARIABLES ${OB_BB_EXPORT_VARIABLES}
+override OB_DOCKER_EXPORT_VARIABLES += OB_BB_LAYERS
+override OB_DOCKER_EXPORT_VARIABLES += DL_DIR SSTATE_DIR DISTRO MACHINE
 
 define export-variable
   ifdef ${1}
@@ -102,32 +102,32 @@ define export-variable
   endif
 endef
 
-$(call foreach-eval,${DOCKER_EXPORT_VARIABLES},export-variable)
+$(call foreach-eval,${OB_DOCKER_EXPORT_VARIABLES},export-variable)
 
-DOCKER_RUN += -e DOCKER_PRESERVE_ENV=$(call comma-list,${DOCKER_EXPORTED_VARIABLES})
+DOCKER_RUN += -e OB_DOCKER_PRESERVE_ENV=$(call comma-list,${DOCKER_EXPORTED_VARIABLES})
 
 # Mount the required volumes if not already done.
-override DOCKER_VOLUMES += ${BUILD_DIR} ${DL_DIR} ${SSTATE_DIR}
+override OB_DOCKER_VOLUMES += ${OB_BUILD_DIR} ${DL_DIR} ${SSTATE_DIR}
 
 define mount-volume
-  ifeq ($(filter ${REPO_DIR}/%,$(abspath ${1})),)
+  ifeq ($(filter ${OB_ROOT_DIR}/%,$(abspath ${1})),)
     DOCKER_RUN += -v ${1}:${1}
   endif
 endef
 
-$(call foreach-eval,${DOCKER_VOLUMES},mount-volume)
+$(call foreach-eval,${OB_DOCKER_VOLUMES},mount-volume)
 
 # Use the previously build image.
 DOCKER_RUN += ${DOCKER_TAG}
 
 # All targets are forwarded to the oe-init-build-env layer inside the docker.
-${ALL_TARGETS}: .forward
+${OB_ALL_TARGETS}: .forward
 
 .PHONY: .forward
-.forward: .docker-build | ${DOCKER_VOLUMES}
+.forward: .docker-build | ${OB_DOCKER_VOLUMES}
 	${DOCKER_RUN} ${SHELL} -c " \
 		trap - SIGINT; \
-		${MAKE} -f ${OPENBAR_DIR}/oe-init-build-env.mk ${MAKECMDGOALS}"
+		${MAKE} -f ${OPENBAR_DIR}/bitbake-init-build-env.mk ${MAKECMDGOALS}"
 
 .PHONY: .docker-build
 .docker-build:
@@ -135,5 +135,5 @@ ${ALL_TARGETS}: .forward
 
 # The docker volumes directories are created manually so that
 # the owner is not root.
-${DOCKER_VOLUMES}:
+${OB_DOCKER_VOLUMES}:
 	mkdir -p $@

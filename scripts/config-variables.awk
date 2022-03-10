@@ -116,7 +116,7 @@ END {
 		print "endif";
 
 	} else {
-		printf "ALL_TARGETS := ";
+		printf "OB_ALL_TARGETS := ";
 
 		for (target in targets) {
 			printf " %s", target;

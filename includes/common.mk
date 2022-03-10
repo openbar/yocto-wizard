@@ -9,7 +9,7 @@ MAKEFLAGS += --no-print-directory
 all:
 
 # Keep the openbar silent if requested.
-ifeq (${VERBOSE}, 0)
+ifeq (${OB_VERBOSE}, 0)
   MAKEFLAGS += --silent
   QUIET := >/dev/null
 endif
@@ -26,7 +26,7 @@ define NEWLINE
 endef
 
 # The configuration file.
-CONFIG := ${REPO_DIR}/.config
+CONFIG := ${OB_ROOT_DIR}/.config
 
 # Yocto requires the use of bash(1).
 SHELL := /bin/bash
@@ -41,17 +41,17 @@ foreach-eval = $(foreach element,$(sort ${1}),$(eval $(call ${2},${element})))
 #
 # The $(shell) function is used to make the call. But the $(shell) invoked does
 # not inherit the internal environment. And therefore, is not able to see the
-# internal variables (like REPO_DIR).
+# internal variables (like OB_ROOT_DIR).
 #
 # So each variables which needs to be exported have to be added in the command
-# line. The CONFIG_EXPORT_VARIABLES variable lists all the variables that will
+# line. The OB_CONFIG_EXPORT_VARIABLES variable lists all the variables that will
 # be exported to the configuration file. This variable can be appended by the
 # user.
 CONFIG_MAKE := ${MAKE}
 
-override CONFIG_EXPORT_VARIABLES += REPO_DIR BUILD_DIR VERBOSE
-override CONFIG_EXPORT_VARIABLES += DEFCONFIG_DIR DOCKER_DIR OE_INIT_BUILD_ENV
-override CONFIG_EXPORT_VARIABLES += DL_DIR SSTATE_DIR DISTRO MACHINE
+override OB_CONFIG_EXPORT_VARIABLES += OB_ROOT_DIR OB_BUILD_DIR OB_VERBOSE
+override OB_CONFIG_EXPORT_VARIABLES += OB_DEFCONFIG_DIR OB_DOCKER_DIR OB_BB_INIT_BUILD_ENV
+override OB_CONFIG_EXPORT_VARIABLES += DL_DIR SSTATE_DIR DISTRO MACHINE
 
 define config-export-variable
   ifdef ${1}
@@ -59,7 +59,7 @@ define config-export-variable
   endif
 endef
 
-$(call foreach-eval,${CONFIG_EXPORT_VARIABLES},config-export-variable)
+$(call foreach-eval,${OB_CONFIG_EXPORT_VARIABLES},config-export-variable)
 
 ## config-parse <script>
 # Parse the configuration file using a specified <script>.
@@ -75,24 +75,24 @@ config-parse = $(subst ${VERTICALTAB},${NEWLINE},\
 ## config-load-variables
 # Load the variables from the configuration (and not the targets).
 #
-# The ALL_TARGETS list the available targets from the configuration. The
+# The OB_ALL_TARGETS list the available targets from the configuration. The
 # internal "shell" target is added manually.
 #
-# The MANUAL_TARGETS is a user configurable variable. The AUTO_TARGETS is
-# automatically deducted from the previous *_TARGETS variables.
+# The OB_MANUAL_TARGETS is a user configurable variable. The OB_AUTO_TARGETS is
+# automatically deducted from the previous OB_*_TARGETS variables.
 #
-# The AUTO_TARGETS are added as dependencies of the "all" target.
+# The OB_AUTO_TARGETS are added as dependencies of the "all" target.
 define config-load-variables-noeval
   $(call config-parse,${OPENBAR_DIR}/scripts/config-variables.awk)
 
-  ALL_TARGETS += shell
-  MANUAL_TARGETS += shell
+  OB_ALL_TARGETS += shell
+  OB_MANUAL_TARGETS += shell
 
-  AUTO_TARGETS := $$(filter-out $${MANUAL_TARGETS},$${ALL_TARGETS})
+  OB_AUTO_TARGETS := $$(filter-out $${OB_MANUAL_TARGETS},$${OB_ALL_TARGETS})
 
-  .PHONY: $${ALL_TARGETS}
+  .PHONY: $${OB_ALL_TARGETS}
 
-  all: $${AUTO_TARGETS}
+  all: $${OB_AUTO_TARGETS}
 endef
 
 config-load-variables = $(eval $(call config-load-variables-noeval))
