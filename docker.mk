@@ -86,12 +86,15 @@ DOCKER_RUN += -w ${OB_ROOT_DIR}
 DOCKER_RUN += -v ${OB_ROOT_DIR}:${OB_ROOT_DIR}
 
 # Export the required environment variables.
-override OB_DOCKER_EXPORT_VARIABLES += OB_ROOT_DIR OB_BUILD_DIR OB_VERBOSE
-override OB_DOCKER_EXPORT_VARIABLES += OB_DEFCONFIG_DIR OB_DOCKER_DIR OB_BB_INIT_BUILD_ENV
-override OB_DOCKER_EXPORT_VARIABLES += OB_BB_EXPORT_LIST_VARIABLE
-override OB_DOCKER_EXPORT_VARIABLES += OB_BB_EXPORT_VARIABLES ${OB_BB_EXPORT_VARIABLES}
-override OB_DOCKER_EXPORT_VARIABLES += OB_BB_LAYERS
-override OB_DOCKER_EXPORT_VARIABLES += DL_DIR SSTATE_DIR DISTRO MACHINE
+override OB_DOCKER_EXPORT_VARIABLES += OB_TYPE OB_ROOT_DIR OB_BUILD_DIR OB_VERBOSE
+override OB_DOCKER_EXPORT_VARIABLES += OB_DEFCONFIG_DIR OB_DOCKER_DIR
+
+ifeq (${OB_TYPE},yocto)
+  override OB_DOCKER_EXPORT_VARIABLES += OB_BB_INIT_BUILD_ENV OB_BB_EXPORT_LIST_VARIABLE
+  override OB_DOCKER_EXPORT_VARIABLES += OB_BB_EXPORT_VARIABLES ${OB_BB_EXPORT_VARIABLES}
+  override OB_DOCKER_EXPORT_VARIABLES += OB_BB_LAYERS
+  override OB_DOCKER_EXPORT_VARIABLES += DL_DIR SSTATE_DIR DISTRO MACHINE
+endif
 
 define export-variable
   ifdef ${1}
@@ -107,7 +110,11 @@ $(call foreach-eval,${OB_DOCKER_EXPORT_VARIABLES},export-variable)
 DOCKER_RUN += -e OB_DOCKER_PRESERVE_ENV=$(call comma-list,${DOCKER_EXPORTED_VARIABLES})
 
 # Mount the required volumes if not already done.
-override OB_DOCKER_VOLUMES += ${OB_BUILD_DIR} ${DL_DIR} ${SSTATE_DIR}
+override OB_DOCKER_VOLUMES += ${OB_BUILD_DIR}
+
+ifeq (${OB_TYPE},yocto)
+  override OB_DOCKER_VOLUMES += ${DL_DIR} ${SSTATE_DIR}
+endif
 
 define mount-volume
   ifeq ($(filter ${OB_ROOT_DIR}/%,$(abspath ${1})),)
@@ -120,14 +127,20 @@ $(call foreach-eval,${OB_DOCKER_VOLUMES},mount-volume)
 # Use the previously build image.
 DOCKER_RUN += ${DOCKER_TAG}
 
-# All targets are forwarded to the oe-init-build-env layer inside the docker.
+# All targets are forwarded to the next layer inside the docker.
 ${OB_ALL_TARGETS}: .forward
+
+ifeq (${OB_TYPE},yocto)
+  NEXT_LAYER := ${OPENBAR_DIR}/bitbake-init-build-env.mk
+else
+  NEXT_LAYER := ${OPENBAR_DIR}/config.mk
+endif
 
 .PHONY: .forward
 .forward: .docker-build | ${OB_DOCKER_VOLUMES}
 	${DOCKER_RUN} ${SHELL} -c " \
 		trap - SIGINT; \
-		${MAKE} -f ${OPENBAR_DIR}/bitbake-init-build-env.mk ${MAKECMDGOALS}"
+		${MAKE} -f ${NEXT_LAYER} ${MAKECMDGOALS}"
 
 .PHONY: .docker-build
 .docker-build:
