@@ -3,7 +3,7 @@
 # The main layer is the entry point and is responsible for:
 # - handling the command line options.
 # - handling the default configuration targets.
-# - handling the cleaning and help targets.
+# - handling the help targets.
 # - handling the special "foreach" target.
 # - forwarding the other targets to the docker layer.
 
@@ -47,7 +47,7 @@ endif
 DEFCONFIG_TARGETS := $(sort $(notdir $(wildcard ${OB_DEFCONFIG_DIR}/*_defconfig)))
 
 # The targets that do not require to have a configuration file.
-NO_CONFIG_TARGETS := ${DEFCONFIG_TARGETS} clean foreach ${FOREACH_TARGETS} help
+NO_CONFIG_TARGETS := ${DEFCONFIG_TARGETS} foreach ${FOREACH_TARGETS} help
 
 # These targets must be declared as soon as possible. This way, the shell
 # completion will work even if a configuration error occurs.
@@ -110,11 +110,6 @@ ${DEFCONFIG_TARGETS}:
 	@echo "Build configured for $@"
 	install -C -m 644 ${OB_DEFCONFIG_DIR}/$@ ${CONFIG}
 
-# The "clean" target.
-.PHONY: clean
-clean:
-	rm -rf ${OB_BUILD_DIR}
-
 # The "help" target.
 .PHONY: help
 help:
@@ -135,9 +130,6 @@ endif
 	@echo
 	@echo 'Configuration targets:'
 	@$(foreach target,${DEFCONFIG_TARGETS},echo '  ${target}';)
-	@echo
-	@echo 'Cleaning targets:'
-	@echo '  clean                - Remove the build directory'
 	@echo
 	@echo 'Usefull targets:'
 	@echo '  help                 - Display this help'

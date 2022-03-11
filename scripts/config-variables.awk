@@ -82,7 +82,6 @@ BEGIN				{ FS = ":" }
 
 # Internal targets are ignored.
 /^[:print:]*_defconfig:/	|| \
-/^clean:/			|| \
 /^foreach:/			|| \
 /^help:/			|| \
 /^shell:/			{ notatarget = 1 }
