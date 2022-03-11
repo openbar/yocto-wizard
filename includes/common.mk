@@ -44,7 +44,7 @@ foreach-eval = $(foreach element,$(sort ${1}),$(eval $(call ${2},${element})))
 # line. The OB_CONFIG_EXPORT_VARIABLES variable lists all the variables that will
 # be exported to the configuration file. This variable can be appended by the
 # user.
-CONFIG_MAKE := ${MAKE}
+CONFIG_MAKE := ${MAKE} MAKE=true
 
 override OB_CONFIG_EXPORT_VARIABLES += OB_TYPE OB_ROOT_DIR OB_BUILD_DIR OB_VERBOSE
 override OB_CONFIG_EXPORT_VARIABLES += OB_DEFCONFIG_DIR OB_DOCKER_DIR
@@ -71,7 +71,7 @@ $(call foreach-eval,${OB_CONFIG_EXPORT_VARIABLES},config-export-variable)
 # So the script is using vertical tabs as separators, that are replaced by
 # newlines later.
 config-parse = $(subst ${VERTICALTAB},${NEWLINE},\
-	$(shell ${CONFIG_MAKE} -npqf ${CONFIG} 2>&1 | awk -f ${1}))
+	$(shell ${CONFIG_MAKE} -rRnpqf ${CONFIG} 2>&1 | awk -f ${1}))
 
 ## config-load-variables
 # Load the variables from the configuration (and not the targets).
