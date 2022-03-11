@@ -1,7 +1,4 @@
-# Do not use make's built-in rules and variables.
 # Disable printing of the working directory.
-MAKEFLAGS += --no-builtin-rules
-MAKEFLAGS += --no-builtin-variables
 MAKEFLAGS += --no-print-directory
 
 # That's our default target when none is given on the command line.
