@@ -61,6 +61,7 @@ endif
 
 # Set the hostname to be identifiable.
 DOCKER_RUN += --hostname $(subst /,-,${DOCKER_IMAGE})
+DOCKER_RUN += --add-host $(subst /,-,${DOCKER_IMAGE}):127.0.0.1
 
 # Bind the local user and group using the docker entrypoint.
 DOCKER_RUN += -v ${OPENBAR_DIR}/scripts/docker-entrypoint.sh:/sbin/docker-entrypoint.sh:ro
