@@ -45,6 +45,7 @@ DOCKER_TAG     := ${DOCKER_IMAGE}:$(call docker-sanitize,${USER})
 DOCKER_BUILD := docker build
 DOCKER_BUILD += -t ${DOCKER_TAG}
 DOCKER_BUILD += -f ${OB_DOCKER_FILE}
+DOCKER_BUILD += ${OB_DOCKER_BUILD_EXTRA_ARGS}
 DOCKER_BUILD += ${OB_DOCKER_CONTEXT}
 
 # The "docker run" command line.
@@ -123,6 +124,9 @@ define mount-volume
 endef
 
 $(call foreach-eval,${OB_DOCKER_VOLUMES},mount-volume)
+
+# Add optional extra arguments.
+DOCKER_RUN += ${OB_DOCKER_RUN_EXTRA_ARGS}
 
 # Use the previously build image.
 DOCKER_RUN += ${DOCKER_TAG}
