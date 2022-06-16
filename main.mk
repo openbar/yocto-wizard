@@ -108,7 +108,8 @@ endif
 .PHONY: ${DEFCONFIG_TARGETS}
 ${DEFCONFIG_TARGETS}:
 	@echo "Build configured for $@"
-	install -C -m 644 ${OB_DEFCONFIG_DIR}/$@ ${CONFIG}
+	diff ${OB_DEFCONFIG_DIR}/$@ ${CONFIG} >/dev/null 2>&1 \
+		|| install -m 644 ${OB_DEFCONFIG_DIR}/$@ ${CONFIG}
 
 # The "help" target.
 .PHONY: help
