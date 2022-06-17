@@ -55,7 +55,7 @@ DOCKER_RUN += --log-driver=none		# Disables any logging for the container.
 DOCKER_RUN += --privileged		# Allow access to devices.
 
 # Allow to run interactive commands.
-ifeq ($(shell tty -s && echo interactive), interactive)
+ifeq ($(shell tty >/dev/null && echo interactive), interactive)
   DOCKER_RUN += --interactive --tty
 endif
 
