@@ -71,7 +71,7 @@ $(call foreach-eval,${OB_CONFIG_EXPORT_VARIABLES},config-export-variable)
 # So the script is using vertical tabs as separators, that are replaced by
 # newlines later.
 config-parse = $(subst ${VERTICALTAB},${NEWLINE},\
-	$(shell ${CONFIG_MAKE} -rRnpqf ${CONFIG} 2>&1 | awk -f ${1}))
+	$(shell LC_ALL=C ${CONFIG_MAKE} -rRnpqf ${CONFIG} 2>&1 | awk -f ${1}))
 
 ## config-load-variables
 # Load the variables from the configuration (and not the targets).
