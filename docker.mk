@@ -143,9 +143,8 @@ endif
 
 .PHONY: .forward
 .forward: .docker-build | ${OB_DOCKER_VOLUMES}
-	${DOCKER_RUN} ${SHELL} -c " \
-		trap - SIGINT; \
-		${MAKE} -f ${NEXT_LAYER} $(filter -j%,${MAKEFLAGS}) ${MAKECMDGOALS}"
+	${DOCKER_RUN} \
+		${MAKE} -f ${NEXT_LAYER} $(filter -j%,${MAKEFLAGS}) ${MAKECMDGOALS}
 
 .PHONY: .docker-build
 .docker-build:
