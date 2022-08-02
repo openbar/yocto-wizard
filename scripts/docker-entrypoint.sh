@@ -21,9 +21,9 @@ useradd \
 # Execute the command as docker
 if which sudo > /dev/null
 then
-	sudo --user docker \
+	exec sudo --user docker \
 		${OB_DOCKER_PRESERVE_ENV:+--preserve-env=${OB_DOCKER_PRESERVE_ENV}} \
 		"$@"
 else
-	su docker --command '"$0" "$@"' -- "$@"
+	exec su docker --command '"$0" "$@"' -- "$@"
 fi
