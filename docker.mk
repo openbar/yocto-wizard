@@ -109,8 +109,6 @@ endef
 
 $(call foreach-eval,${OB_DOCKER_EXPORT_VARIABLES},export-variable)
 
-DOCKER_RUN += -e OB_DOCKER_PRESERVE_ENV=$(call comma-list,${DOCKER_EXPORTED_VARIABLES})
-
 # Mount the required volumes if not already done.
 override OB_DOCKER_VOLUMES += ${OB_BUILD_DIR}
 
