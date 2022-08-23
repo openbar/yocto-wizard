@@ -27,10 +27,12 @@ ${OB_ALL_TARGETS}: .forward
 
 .PHONY: .validate-bitbake-layers
 .validate-bitbake-layers: .add-bitbake-layers
-	bitbake-layers show-layers -q
+	${QUIET} bitbake-layers show-layers
 
 .PHONY: .add-bitbake-layers
 .add-bitbake-layers:
 ifneq ($(strip ${OB_BB_LAYERS}),)
-	bitbake-layers add-layer -q ${OB_BB_LAYERS}
+	for LAYER in ${OB_BB_LAYERS}; do \
+		${QUIET} bitbake-layers add-layer -F $${LAYER}; \
+	done
 endif
