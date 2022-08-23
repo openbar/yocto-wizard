@@ -30,7 +30,7 @@ BEGIN				{ ORS = "\v" }
 /^\.POSIX:/			{ notatarget = 1 }
 
 # Internal targets are ignored.
-/^[:print:]*_defconfig:/	|| \
+/^[[:print:]]*_defconfig:/	|| \
 /^foreach:/			|| \
 /^help:/			|| \
 /^shell:/			{ notatarget = 1 }
