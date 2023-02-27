@@ -117,9 +117,14 @@ ifeq (${OB_TYPE},yocto)
   override OB_DOCKER_VOLUMES += ${DL_DIR} ${SSTATE_DIR}
 endif
 
+first-field = $(firstword $(subst ${COLON},${SPACE},${1}))
+last-field = $(lastword $(subst ${COLON},${SPACE},${1}))
+
+DOCKER_VOLUMES :=
 define mount-volume
-  ifeq ($(filter ${OB_ROOT_DIR}/%,$(abspath ${1})),)
-    DOCKER_RUN += -v ${1}:${1}
+  ifeq ($(filter ${OB_ROOT_DIR}/%,$(abspath $(call first-field,${1}))),)
+    DOCKER_RUN += -v $(call first-field,${1}):$(call last-field,${1})
+    DOCKER_VOLUMES += $(call first-field,${1})
   endif
 endef
 
@@ -141,7 +146,7 @@ else
 endif
 
 .PHONY: .forward
-.forward: .docker-build | ${OB_DOCKER_VOLUMES}
+.forward: .docker-build | ${DOCKER_VOLUMES}
 	${DOCKER_RUN} \
 		${MAKE} -f ${NEXT_LAYER} $(filter -j%,${MAKEFLAGS}) ${MAKECMDGOALS}
 
@@ -151,5 +156,5 @@ endif
 
 # The docker volumes directories are created manually so that
 # the owner is not root.
-${OB_DOCKER_VOLUMES}:
+${DOCKER_VOLUMES}:
 	mkdir -p $@

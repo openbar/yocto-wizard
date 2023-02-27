@@ -14,6 +14,7 @@ endif
 # Useful variables for make's $(subst) function.
 EMPTY       :=
 COMMA       := ,
+COLON       := :
 SPACE       := ${EMPTY} ${EMPTY}
 VERTICALTAB := ${EMPTY}${EMPTY}
 
