@@ -13,7 +13,7 @@ groupadd \
 	docker
 
 useradd \
-	--home-dir /home/docker --no-create-home \
+	--home-dir ${OB_DOCKER_HOME:-/home/docker} --no-create-home \
 	${OB_DOCKER_UID:+--non-unique --uid ${OB_DOCKER_UID}} \
 	--gid docker \
 	${OB_DOCKER_GROUPS:+--groups ${OB_DOCKER_GROUPS}} \

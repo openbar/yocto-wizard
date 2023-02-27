@@ -67,6 +67,7 @@ DOCKER_RUN += --add-host $(subst /,-,${DOCKER_IMAGE}):127.0.0.1
 DOCKER_RUN += -v ${OPENBAR_DIR}/scripts/docker-entrypoint.sh:/sbin/docker-entrypoint.sh:ro
 DOCKER_RUN += --entrypoint docker-entrypoint.sh
 
+DOCKER_RUN += -e OB_DOCKER_HOME=${OB_DOCKER_HOME}
 DOCKER_RUN += -e OB_DOCKER_UID=$$(id -u)
 DOCKER_RUN += -e OB_DOCKER_GID=$$(id -g)
 

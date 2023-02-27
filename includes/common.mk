@@ -28,6 +28,9 @@ CONFIG := ${OB_ROOT_DIR}/.config
 # Yocto requires the use of bash(1).
 SHELL := /bin/bash
 
+# Give exported variables a default value.
+export OB_DOCKER_HOME ?= /home/docker
+
 ## foreach-eval <list> <function>
 # For each unique element of the <list>, evaluate the specified <function> call.
 foreach-eval = $(foreach element,$(sort ${1}),$(eval $(call ${2},${element})))
@@ -46,8 +49,9 @@ foreach-eval = $(foreach element,$(sort ${1}),$(eval $(call ${2},${element})))
 # user.
 CONFIG_MAKE := ${MAKE} MAKE=true
 
-override OB_CONFIG_EXPORT_VARIABLES += OB_TYPE OB_ROOT_DIR OB_BUILD_DIR OB_VERBOSE
-override OB_CONFIG_EXPORT_VARIABLES += OB_DEFCONFIG_DIR OB_DOCKER_DIR
+override OB_CONFIG_EXPORT_VARIABLES += OB_TYPE OB_ROOT_DIR OB_BUILD_DIR
+override OB_CONFIG_EXPORT_VARIABLES += OB_VERBOSE OB_DEFCONFIG_DIR
+override OB_CONFIG_EXPORT_VARIABLES += OB_DOCKER_DIR OB_DOCKER_HOME
 
 ifeq (${OB_TYPE},yocto)
   override OB_CONFIG_EXPORT_VARIABLES += OB_BB_INIT_BUILD_ENV
