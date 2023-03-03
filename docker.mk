@@ -47,6 +47,9 @@ DOCKER_BUILD += -t ${DOCKER_TAG}
 DOCKER_BUILD += -f ${OB_DOCKER_FILE}
 DOCKER_BUILD += ${OB_DOCKER_BUILD_EXTRA_ARGS}
 DOCKER_BUILD += ${OB_DOCKER_CONTEXT}
+ifeq (${OB_VERBOSE}, 0)
+  DOCKER_BUILD += --quiet
+endif
 
 # The "docker run" command line.
 DOCKER_RUN := docker run
