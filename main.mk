@@ -125,8 +125,11 @@ else ifdef CONFIG_ERROR
 else ifeq (${OB_ALL_TARGETS},)
 	@echo '  No command defined'
 else
-	@$(foreach target,${OB_AUTO_TARGETS},echo '* ${target}';)
-	@$(foreach target,${OB_MANUAL_TARGETS},echo '  ${target}';)
+	@$(foreach target,$(sort $(filter-out shell,${OB_ALL_TARGETS})),\
+		$(if $(filter ${target},${OB_AUTO_TARGETS}),\
+			echo '* ${target}';,\
+			echo '  ${target}';))
+	@echo '  shell'
 endif
 	@echo
 	@echo 'Configuration targets:'
