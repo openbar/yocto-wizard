@@ -23,6 +23,4 @@ useradd \
 chown -R docker:docker /home/docker
 
 # Execute the command as docker
-COMMAND=$(which ${1})
-shift
-exec su docker --shell ${COMMAND} -- $@
+exec runuser -u docker -- "$@"
