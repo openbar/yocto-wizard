@@ -11,13 +11,17 @@ BEGIN				{ FS = ":" }
 
 # Handle makefile errors.
 /\*\*\*.*Stop\.$/		{ error = $0;
-	                          sub(/.*\*\*\*[[:space:]]+/, "", error);
-	                          sub(/\.[[:space:]]+Stop\.$/, "", error);
+				  sub(/.*\*\*\*[[:space:]]+/, "", error);
+				  sub(/\.[[:space:]]+Stop\.$/, "", error);
 				  exit; }
+
+# Handle multi-line variables.
+/^define /			{ multiline = 1 }
+/^endef$/			{ multiline = 0 }
 
 # Variables are defined in a dedicated section surrounded by blank lines.
 /^#[[:space:]]+Variables$/	{ variable_section = 2 }
-/^$/				{ variable_section-- }
+/^$/				{ if (multiline == 0) variable_section-- }
 
 # Only explicit variables are valid.
 /^#[[:space:]]+makefile \(from '[[:print:]]+', line [[:digit:]]+\)$/	{ variable = 1 }
@@ -30,7 +34,7 @@ BEGIN				{ FS = ":" }
 /^$/				{ notatarget = 0 }
 
 # Comments and blank lines are skipped.
-/^#/ || /^$/			{ next }
+/^#/ || /^$/			{ if (multiline == 0) next }
 
 # Special variables are ignored.
 /^\.DEFAULT_GOAL/		|| \
@@ -61,7 +65,7 @@ BEGIN				{ FS = ":" }
 /^OUTPUT_OPTION/		|| \
 /^SHELL/			|| \
 /^SUFFIXES/			|| \
-/^VPATH/			{ variable = 0 }
+/^VPATH/			{ if (multiline == 0) variable = 0 }
 
 # Special targets are ignored.
 /^\.PHONY:/			|| \
@@ -87,7 +91,7 @@ BEGIN				{ FS = ":" }
 /^shell:/			{ notatarget = 1 }
 
 # Recipes are skipped.
-/^\t/				{ next }
+/^\t/				{ if (multiline == 0) next }
 
 {
 	# Remaining variables are printed.
@@ -96,7 +100,7 @@ BEGIN				{ FS = ":" }
 	}
 
 	# The next variable must be validated again.
-	variable = 0;
+	if (multiline == 0) variable = 0;
 
 	# Remaining targets are saved.
 	if (target_section > 0 && !notatarget) {
