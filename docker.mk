@@ -59,7 +59,7 @@ DOCKER_RUN += --privileged		# Allow access to devices.
 
 # Allow to run interactive commands.
 ifeq ($(shell tty >/dev/null && echo interactive), interactive)
-  DOCKER_RUN += --interactive --tty
+  DOCKER_RUN += --interactive --tty -e TERM=${TERM}
 endif
 
 # Set the hostname to be identifiable.
