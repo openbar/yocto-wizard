@@ -48,7 +48,7 @@ For more information about the OpenBar project, the specifications of
 the `openbar` build system, and to discover some examples, please visit
 the project documentation:
 
-> https://openbar.github.io
+> https://openbar.readthedocs.io
 
 ## License
 

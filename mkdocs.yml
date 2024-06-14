@@ -1,0 +1,23 @@
+site_name: OpenBar
+site_url: https://openbar.readthedocs.io
+
+repo_name: openbar/openbar
+repo_url: https://github.com/openbar/openbar
+edit_uri: edit/main/docs
+
+theme:
+  name: material
+  logo: images/openbar.png
+  favicon: images/favicon.ico
+  features:
+    - content.action.edit
+
+markdown_extensions:
+  - def_list
+
+plugins:
+  - search
+  - ezglossary
+
+nav:
+  - Home: index.md
