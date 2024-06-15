@@ -1,6 +1,10 @@
+---
+---
 #!/bin/sh
 
-OB_VERSION=${1:-29e2146d8951f4763560642f731dad6610eb6ba5}
+OB_VERSION=${1:-{{ site.github.build_revision }}}
+OB_REPOSITORY_NWO={{ site.github.repository_nwo }}
+OB_REPOSITORY_URL={{ site.github.repository_url }}
 
 # Colorize the output
 red()    { printf "\033[0;31m${@}\033[0m"; }
@@ -413,7 +417,7 @@ create_manifest_standard()
 
   <default remote="origin" revision="main" sync-j="4" />
 
-  <project path="${OB_OPENBAR_DIR}" remote="github" revision="${OB_VERSION}" upstream="main" name="openbar/openbar" />
+  <project path="${OB_OPENBAR_DIR}" remote="github" revision="${OB_VERSION}" upstream="main" name="${OB_REPOSITORY_NWO}" />
 
   <project path="${OB_CONFIGS_DIR}" name="${OB_GIT_MAIN_PATH}" >
     <copyfile src="${OB_ROOT_FILE}" dest="Makefile" />
@@ -436,7 +440,7 @@ create_manifest_yocto()
 
   <default remote="origin" revision="main" sync-j="4" />
 
-  <project path="${OB_OPENBAR_DIR}" remote="github" revision="${OB_VERSION}" upstream="main" name="openbar/openbar" />
+  <project path="${OB_OPENBAR_DIR}" remote="github" revision="${OB_VERSION}" upstream="main" name="${OB_REPOSITORY_NWO}" />
 
   <project path="${OB_CONFIGS_DIR}" name="${OB_GIT_MAIN_PATH}" >
     <copyfile src="${OB_ROOT_FILE}" dest="Makefile" />
@@ -485,7 +489,7 @@ create_project()
         local ROOT_DIR=${OB_GIT_MAIN_PATH}
 
         echo "Adding openbar submodule..."
-        git -C ${OB_GIT_MAIN_PATH} submodule --quiet add "https://github.com/openbar/openbar" ${OB_OPENBAR_DIR}
+        git -C ${OB_GIT_MAIN_PATH} submodule --quiet add "${OB_REPOSITORY_URL}" ${OB_OPENBAR_DIR}
         git -C ${OB_GIT_MAIN_PATH}/${OB_OPENBAR_DIR} checkout --quiet ${OB_VERSION}
 
         if [ -n "${OB_POKY_DIR}" ]
