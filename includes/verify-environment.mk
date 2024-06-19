@@ -27,10 +27,10 @@ else ifeq ($(realpath ${OB_DEFCONFIG_DIR}),)
   $(error The directory OB_DEFCONFIG_DIR must exist)
 endif
 
-ifndef OB_DOCKER_DIR
-  $(error The directory OB_DOCKER_DIR must be specified in the environment)
-else ifeq ($(realpath ${OB_DOCKER_DIR}),)
-  $(error The directory OB_DOCKER_DIR must exist)
+ifndef OB_CONTAINER_DIR
+  $(error The directory OB_CONTAINER_DIR must be specified in the environment)
+else ifeq ($(realpath ${OB_CONTAINER_DIR}),)
+  $(error The directory OB_CONTAINER_DIR must exist)
 endif
 
 ifeq (${OB_TYPE},yocto)

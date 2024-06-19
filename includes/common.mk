@@ -30,7 +30,7 @@ CONFIG := ${OB_ROOT_DIR}/.config
 SHELL := /bin/bash
 
 # Give exported variables a default value.
-export OB_DOCKER_HOME ?= /home/docker
+export OB_CONTAINER_HOME ?= /home/container
 
 ## foreach-eval <list> <function>
 # For each unique element of the <list>, evaluate the specified <function> call.
@@ -52,7 +52,7 @@ CONFIG_MAKE := ${MAKE} MAKE=true
 
 override OB_CONFIG_EXPORT_VARIABLES += OB_TYPE OB_ROOT_DIR OB_BUILD_DIR
 override OB_CONFIG_EXPORT_VARIABLES += OB_VERBOSE OB_DEFCONFIG_DIR
-override OB_CONFIG_EXPORT_VARIABLES += OB_DOCKER_DIR OB_DOCKER_HOME
+override OB_CONFIG_EXPORT_VARIABLES += OB_CONTAINER_DIR OB_CONTAINER_HOME
 
 ifeq (${OB_TYPE},yocto)
   override OB_CONFIG_EXPORT_VARIABLES += OB_BB_INIT_BUILD_ENV
