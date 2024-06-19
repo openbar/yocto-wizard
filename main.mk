@@ -5,7 +5,7 @@
 # - handling the default configuration targets.
 # - handling the help targets.
 # - handling the special "foreach" target.
-# - forwarding the other targets to the docker layer.
+# - forwarding the other targets to the container layer.
 
 # The openbar directory. This must be done before any includes.
 OPENBAR_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
@@ -92,14 +92,18 @@ ifneq (${HAVE_FOREACH},)
 		${MAKE} $${TARGET} && ${MAKE} ${FOREACH_TARGETS}; \
 	done
 else
-  # All configuration targets are forwarded to the docker layer.
+  # All configuration targets are forwarded to the container layer.
   ifndef CONFIG_ERROR
     ifneq (${OB_ALL_TARGETS},)
       ${OB_ALL_TARGETS}: .forward
 
       .PHONY: .forward
       .forward:
+      ifeq (${OB_CONTAINER_ENGINE},docker)
 	${MAKE} -f ${OPENBAR_DIR}/docker.mk ${MAKECMDGOALS}
+      else
+	${MAKE} -f ${OPENBAR_DIR}/podman.mk ${MAKECMDGOALS}
+      endif
     endif
   endif
 endif
