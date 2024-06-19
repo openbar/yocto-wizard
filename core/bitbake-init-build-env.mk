@@ -6,7 +6,7 @@
 # - initializing the bitbake environment.
 
 # The openbar directory. This must be done before any includes.
-OPENBAR_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
+OPENBAR_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST}))/..)
 
 # Include the common makefiles.
 include ${OPENBAR_DIR}/includes/verify-environment.mk
@@ -41,7 +41,7 @@ ${OB_ALL_TARGETS}: .forward
 .PHONY: .forward
 .forward: .clean-bblayers
 	${QUIET} . ${OB_BB_INIT_BUILD_ENV} ${OB_BUILD_DIR} \
-		&& ${MAKE} -f ${OPENBAR_DIR}/bitbake-layers.mk ${MAKECMDGOALS}
+		&& ${MAKE} -f ${OPENBAR_DIR}/core/bitbake-layers.mk ${MAKECMDGOALS}
 
 # The configuration of the bitbake layers must be removed. It will then be
 # rebuilt each time by the following bitbake-layers layer.

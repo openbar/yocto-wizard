@@ -7,7 +7,7 @@
 # and development purpose.
 
 # The openbar directory. This must be done before any includes.
-OPENBAR_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
+OPENBAR_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST}))/..)
 
 # Include the common makefiles.
 include ${OPENBAR_DIR}/includes/verify-environment.mk

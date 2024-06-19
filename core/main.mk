@@ -8,7 +8,7 @@
 # - forwarding the other targets to the container layer.
 
 # The openbar directory. This must be done before any includes.
-OPENBAR_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
+OPENBAR_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST}))/..)
 
 # Ensure the type has been set.
 export OB_TYPE ?= standard
@@ -100,9 +100,9 @@ else
       .PHONY: .forward
       .forward:
       ifeq (${OB_CONTAINER_ENGINE},docker)
-	${MAKE} -f ${OPENBAR_DIR}/docker.mk ${MAKECMDGOALS}
+	${MAKE} -f ${OPENBAR_DIR}/core/docker.mk ${MAKECMDGOALS}
       else
-	${MAKE} -f ${OPENBAR_DIR}/podman.mk ${MAKECMDGOALS}
+	${MAKE} -f ${OPENBAR_DIR}/core/podman.mk ${MAKECMDGOALS}
       endif
     endif
   endif

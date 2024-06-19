@@ -5,7 +5,7 @@
 # - validating the configured bitbake layers.
 
 # The openbar directory. This must be done before any includes.
-OPENBAR_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
+OPENBAR_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST}))/..)
 
 # Include the common makefiles.
 include ${OPENBAR_DIR}/includes/verify-environment.mk
@@ -23,7 +23,7 @@ ${OB_ALL_TARGETS}: .forward
 
 .PHONY: .forward
 .forward: .validate-bitbake-layers
-	${MAKE} -f ${OPENBAR_DIR}/config.mk ${MAKECMDGOALS}
+	${MAKE} -f ${OPENBAR_DIR}/core/config.mk ${MAKECMDGOALS}
 
 .PHONY: .validate-bitbake-layers
 .validate-bitbake-layers: .add-bitbake-layers

@@ -9,7 +9,7 @@
 # - binding the local ssh configuration.
 
 # The openbar directory. This must be done before any includes.
-OPENBAR_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST})))
+OPENBAR_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST}))/..)
 
 # Include the common makefiles.
 include ${OPENBAR_DIR}/includes/verify-environment.mk
@@ -51,9 +51,9 @@ PODMAN_RUN += ${CONTAINER_TAG}
 ${OB_ALL_TARGETS}: .forward
 
 ifeq (${OB_TYPE}, yocto)
-  NEXT_LAYER := ${OPENBAR_DIR}/bitbake-init-build-env.mk
+  NEXT_LAYER := ${OPENBAR_DIR}/core/bitbake-init-build-env.mk
 else
-  NEXT_LAYER := ${OPENBAR_DIR}/config.mk
+  NEXT_LAYER := ${OPENBAR_DIR}/core/config.mk
 endif
 
 .PHONY: .forward
