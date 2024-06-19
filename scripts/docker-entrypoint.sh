@@ -13,14 +13,14 @@ groupadd \
 	docker
 
 useradd \
-	--home-dir ${OB_DOCKER_HOME:-/home/docker} --no-create-home \
+	--home-dir ${OB_DOCKER_HOME:=/home/docker} --no-create-home \
 	${OB_DOCKER_UID:+--non-unique --uid ${OB_DOCKER_UID}} \
 	--gid docker \
 	${OB_DOCKER_GROUPS:+--groups ${OB_DOCKER_GROUPS}} \
 	docker
 
 # Adjust rights for the user home
-chown -R docker:docker /home/docker
+chown -R docker:docker ${OB_DOCKER_HOME}
 
 # Execute the command as docker
 exec runuser -u docker -- "$@"

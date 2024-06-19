@@ -79,11 +79,11 @@ ifdef OB_DOCKER_GROUPS
 endif
 
 # Bind the local ssh configuration and authentication.
-DOCKER_RUN += -v ${HOME}/.ssh:/home/docker/.ssh
+DOCKER_RUN += -v ${HOME}/.ssh:${OB_DOCKER_HOME}/.ssh
 
 ifdef SSH_AUTH_SOCK
-  DOCKER_RUN += -v ${SSH_AUTH_SOCK}:/tmp/ssh.socket
-  DOCKER_RUN += -e SSH_AUTH_SOCK=/tmp/ssh.socket
+  DOCKER_RUN += -v ${SSH_AUTH_SOCK}:${OB_DOCKER_HOME}/ssh.socket
+  DOCKER_RUN += -e SSH_AUTH_SOCK=${OB_DOCKER_HOME}/ssh.socket
 endif
 
 # Mount the repo directory as working directory.
