@@ -14,23 +14,29 @@ else ifeq ($(realpath ${OB_ROOT_DIR}),)
 endif
 
 ifndef OB_BUILD_DIR
- $(error The directory OB_BUILD_DIR must be specified in the environment)
+  $(error The directory OB_BUILD_DIR must be specified in the environment)
 endif
 
 ifndef OB_VERBOSE
- $(error The variable OB_VERBOSE must be specified in the environment)
+  $(error The variable OB_VERBOSE must be specified in the environment)
 endif
 
 ifndef OB_DEFCONFIG_DIR
- $(error The directory OB_DEFCONFIG_DIR must be specified in the environment)
+  $(error The directory OB_DEFCONFIG_DIR must be specified in the environment)
+else ifeq ($(realpath ${OB_DEFCONFIG_DIR}),)
+  $(error The directory OB_DEFCONFIG_DIR must exist)
 endif
 
 ifndef OB_DOCKER_DIR
- $(error The directory OB_DOCKER_DIR must be specified in the environment)
+  $(error The directory OB_DOCKER_DIR must be specified in the environment)
+else ifeq ($(realpath ${OB_DOCKER_DIR}),)
+  $(error The directory OB_DOCKER_DIR must exist)
 endif
 
 ifeq (${OB_TYPE},yocto)
   ifndef OB_BB_INIT_BUILD_ENV
-   $(error The file OB_BB_INIT_BUILD_ENV must be specified in the environment)
+    $(error The file OB_BB_INIT_BUILD_ENV must be specified in the environment)
+  else ifeq ($(realpath ${OB_BB_INIT_BUILD_ENV}),)
+    $(error The file OB_BB_INIT_BUILD_ENV must exist)
   endif
 endif
