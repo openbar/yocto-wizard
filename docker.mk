@@ -84,7 +84,6 @@ DOCKER_RUN += -v ${HOME}/.ssh:/home/docker/.ssh
 ifdef SSH_AUTH_SOCK
   DOCKER_RUN += -v ${SSH_AUTH_SOCK}:/tmp/ssh.socket
   DOCKER_RUN += -e SSH_AUTH_SOCK=/tmp/ssh.socket
-  DOCKER_EXPORTED_VARIABLES += SSH_AUTH_SOCK
 endif
 
 # Mount the repo directory as working directory.
@@ -106,7 +105,6 @@ define export-variable
   ifdef ${1}
     ifeq ($(origin ${1}),$(filter $(origin ${1}),environment command line))
       DOCKER_RUN += -e ${1}=${${1}}
-      DOCKER_EXPORTED_VARIABLES += ${1}
     endif
   endif
 endef
