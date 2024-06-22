@@ -1,302 +1,217 @@
 ---
 ---
 #!/bin/sh
+# vi: ft=sh
+# shellcheck shell=sh enable=all
 
 OB_VERSION=${1:-{{ site.github.build_revision }}}
 OB_REPOSITORY_NWO={{ site.github.repository_nwo }}
 OB_REPOSITORY_URL={{ site.github.repository_url }}
 
 # Colorize the output
-red()    { printf "\033[0;31m${@}\033[0m"; }
-green()  { printf "\033[0;32m${@}\033[0m"; }
-yellow() { printf "\033[0;33m${@}\033[0m"; }
-
-## ask_yesno <prompt> [default=yes]
-ask_yesno()
-{
-    local DEFAULT=${2:-yes}
-
-    [ ${DEFAULT} = yes ] && local PROMPT="[Y/n]" || local PROMPT="[y/N]"
-
-    while true
-    do
-        local YESNO
-        echo >&2 && read -p "$(yellow "${1}") ${PROMPT} " YESNO
-        case "${YESNO}" in
-            "") [ ${DEFAULT} = yes ] && return 0 || return 1 ;;
-            [yY]|[yY][eE][sS]) return 0 ;;
-            [nN]|[nN][oO]) return 1 ;;
-            *) echo >&2 $(red "Invalid response: ${YESNO}") ;;
-        esac
-    done
-}
-
-## ask_value <prompt> [default]
-ask_value()
-{
-    local DEFAULT=${2}
-
-    [ -n "${DEFAULT}" ] && local PROMPT=" [${DEFAULT}]"
-
-    while true
-    do
-        local VALUE
-        echo >&2 && read -p "$(yellow "${1}")${PROMPT} " VALUE
-        if [ -z "${VALUE:-${DEFAULT}}" ]
-        then
-            echo >&2 $(red "Invalid empty response")
-        else
-            echo ${VALUE:-${DEFAULT}}
-            return 0
-        fi
-    done
-}
-
-## ask_select <prompt> <colon-list> [default=1]
-ask_select()
-{
-    ## print_list <colon-list>
-    print_list()
-    {
-        echo ${1} | awk -F: '{
-            for (i = 1; i <= NF; i++) {
-                printf("%2s) %s\n", i, $i) > "/dev/stderr";
-            }
-        }'
-    }
-
-    ## check_value <colon-list> <value> [default=1]
-    check_value()
-    {
-        echo ${1} | awk -F: -v value=${2:-${3:-1}} '{
-            lcvalue = tolower(value);
-            for (i = 1; i <= NF; i++) {
-                if (lcvalue == i || lcvalue == $i) {
-                    printf("%s", $i);
-                    exit;
-                }
-            }
-        }'
-    }
-
-    local DEFAULT=$(check_value ${2} ${3:-1})
-
-    while true
-    do
-        echo >&2 && print_list ${2}
-        local VALUE
-        read -p "$(yellow "${1}") [${DEFAULT}] " VALUE
-        local SVALUE=$(check_value ${2} "${VALUE}" ${DEFAULT})
-        if [ -z "${SVALUE}" ]
-        then
-            echo >&2 $(red "Invalid response: ${VALUE}")
-        else
-            echo ${SVALUE}
-            return 0
-        fi
-    done
-}
-
-## sanitize [<option>...]
-sanitize()
-{
-    local VALUE="$(cat)"
-
-    # Protect against CTRL-D
-    if [ -z "${VALUE}" ]
-    then
-        echo >&2 $(red "Invalid empty value")
-        exit 1
-    fi
-
-    for OPTION in $@
-    do
-        local OLD_VALUE="${VALUE}"
-        local PROMPT_NEQ= PROMPT=
-
-        case ${OPTION} in
-            onlyprint)
-                PROMPT_NEQ="Only printable character allowed"
-                VALUE=$(echo ${VALUE} | sed -e "s/[^[[:print:]]]//g")
-                ;;
-            noslash)
-                PROMPT_NEQ="Slash character not allowed"
-                VALUE=$(echo ${VALUE} | sed -e "s:/::g")
-                ;;
-            noleadingslash)
-                PROMPT_NEQ="Leading slash character not allowed"
-                VALUE=$(echo ${VALUE} | sed -e "s:^/::")
-                ;;
-            notrailingslash)
-                PROMPT_NEQ="Trailing slash character not allowed"
-                VALUE=$(echo ${VALUE} | sed -e "s:/$::")
-                ;;
-            nospace)
-                PROMPT_NEQ="Space character not allowed"
-                VALUE=$(echo ${VALUE} | sed -e "s/[[:space:]]//g")
-                ;;
-            trailingdefconfig)
-                PROMPT_NEQ="Trailing '_defconfig' is mandatory"
-                VALUE=$(echo ${VALUE} | sed -e "s/_defconfig$//" -e "s/$/_defconfig/")
-                ;;
-            preferedlower)
-                echo ${VALUE} | grep -q "[[:upper:]]" \
-                    && PROMPT="Using lowercase characters is recommended"
-                ;;
-            *)
-                PROMPT="Invalid option ${OPTION}"
-                ;;
-        esac
-
-        if [ -n "${PROMPT_NEQ}" -a "${OLD_VALUE}" != "${VALUE}" ]
-        then
-            echo >&2 $(red "${PROMPT_NEQ}:") "'${OLD_VALUE}' -> '${VALUE}'"
-        elif [ -n "${PROMPT}" ]
-        then
-            echo >&2 $(red "${PROMPT}")
-        fi
-    done
-
-    echo ${VALUE}
-}
+red() { echo "\033[0;31m${*}\033[0m"; }
+green() { echo "\033[0;32m${*}\033[0m"; }
+yellow() { echo "\033[0;33m${*}\033[0m"; }
 
 # Create the temporary directory
 TMP_DIR=$(mktemp -d)
 
 # Exit handler
-on_exit()
-{
-    local EXIT_STATUS=${1:-$?}
+on_exit() {
+	EXIT_STATUS=${1:-$?}
 
-    # Remove the temporary directory
-    rm -rf ${TMP_DIR}
+	# Remove the temporary directory
+	rm -rf "${TMP_DIR}"
 
-    # Print a status line
-    if [ ${EXIT_STATUS} -eq 0 ]
-    then
-        echo
-        echo $(green "Openbar project generation done")
-    else
-        echo >&2 && echo >&2
-        echo >&2 $(red "Openbar project generation aborted")
-    fi
+	# Print a status line
+	if [ "${EXIT_STATUS}" -eq 0 ]; then
+		echo
+		green "Openbar project generation done"
+	else
+		printf >&2 "\n\n"
+		red >&2 "Openbar project generation aborted"
+	fi
 
-    # Self remove
-    rm ${0}
-
-    exit ${EXIT_STATUS}
+	exit "${EXIT_STATUS}"
 }
 
 # Ensure the exit handler is always called
 # https://unix.stackexchange.com/a/240736/117394
-on_sigint()
-{
-    trap - INT EXIT
-    on_exit 1
-    kill -s INT $$
+on_sigint() {
+	trap - INT EXIT
+	on_exit 1
+	kill -s INT $$
 }
 
 trap on_sigint INT
 trap on_exit EXIT
 
-# Enable exit on error
-set -e
+## ask <question> [prompt]
+ask() {
+	QUESTION=$(yellow "${1}")
+	printf >&2 "%s%s " "${QUESTION}" "${2:+ ${2}}"
+}
 
-### Ask the required configuration for the project
+## ask_yesno <question> [default=yes]
+ask_yesno() {
+	DEFAULT="${2:-yes}"
 
-OB_NAME=$(ask_value "What is the name of your project?" \
-    | sanitize onlyprint noslash nospace preferedlower)
+	[ "${DEFAULT}" = yes ] && PROMPT="[Y/n]" || PROMPT="[y/N]"
 
-OB_TYPE=$(ask_select "What type of project is it?" "standard:yocto" "standard")
+	while true; do
+		echo >&2
+		ask "${1}" "${PROMPT}"
 
-OB_GIT_TYPE=$(ask_select "How do you want to manage the git repositories?" "submodule:repo" "repo")
+		read -r YESNO
 
-if [ "${OB_GIT_TYPE}" = repo ]
-then
-    OB_GIT_MAIN_PATH_DEFAULT="${OB_NAME}/configs"
+		case "${YESNO}" in
+		"") [ "${DEFAULT}" = yes ] && return 0 || return 1 ;;
+		[yY] | [yY][eE][sS]) return 0 ;;
+		[nN] | [nN][oO]) return 1 ;;
+		*) red >&2 "Invalid response: ${YESNO}" ;;
+		esac
+	done
+}
 
-    if ask_yesno "Do you want the repo manifest to be stored in a dedicated repository?" "yes"
-    then
-        OB_REPO_TYPE=split
-    fi
+## ask_value <question> [default]
+ask_value() {
+	DEFAULT="${2}"
 
-else
-    OB_GIT_MAIN_PATH_DEFAULT="${OB_NAME}"
-fi
+	[ -n "${DEFAULT}" ] && PROMPT=" [${DEFAULT}]" || PROMPT=""
 
-if [ "${OB_TYPE}" = yocto ]
-then
-    OB_OPENBAR_DIR_DEFAULT="platform/openbar"
+	while true; do
+		echo >&2
+		ask "${1}" "${PROMPT}"
 
-    if ask_yesno "Do you need meta-openembedded?" "no"
-    then
-        OB_YOCTO_OE=yes
-    fi
+		read -r VALUE
 
-else
-    OB_OPENBAR_DIR_DEFAULT="third-party/openbar"
-fi
+		if [ -z "${VALUE:-${DEFAULT}}" ]; then
+			red >&2 "Invalid empty response"
+		else
+			echo "${VALUE:-${DEFAULT}}"
+			return 0
+		fi
+	done
+}
 
-OB_GIT_MAIN_PATH=$(ask_value "What is the path of the main git repository?" ${OB_GIT_MAIN_PATH_DEFAULT} \
-    | sanitize onlyprint noleadingslash notrailingslash nospace preferedlower)
+## ask_select <question> <colon-list> [default=1]
+ask_select() {
+	## print_list <colon-list>
+	print_list() {
+		echo "${1}" | awk -F: '{
+			for (i = 1; i <= NF; i++) {
+				printf("%2s) %s\n", i, $i) > "/dev/stderr";
+			}
+		}'
+	}
 
-if [ "${OB_REPO_TYPE}" = split ]
-then
-    OB_GIT_MANIFEST_PATH=$(ask_value "What is the path of the manifest git repository?" "${OB_NAME}/manifest" \
-        | sanitize onlyprint noleadingslash notrailingslash nospace preferedlower)
-else
-    OB_GIT_MANIFEST_PATH=${OB_GIT_MAIN_PATH}
-fi
+	## check_value <colon-list> <value> [default=1]
+	check_value() {
+		echo "${1}" | awk -F: -v VALUE="${2:-${3:-1}}" '{
+			LCVALUE = tolower(VALUE);
+			for (i = 1; i <= NF; i++) {
+				if (LCVALUE == i || LCVALUE == $i) {
+					printf("%s", $i);
+					exit;
+				}
+			}
+		}'
+	}
 
-OB_CONFIGS_DIR=$(ask_value "What is the path of the configuration directory?" "configs" \
-    | sanitize onlyprint noleadingslash notrailingslash nospace preferedlower)
+	DEFAULT=$(check_value "${2}" "${3:-1}")
 
-OB_OPENBAR_DIR=$(ask_value "What is the path of the openbar directory?" ${OB_OPENBAR_DIR_DEFAULT} \
-    | sanitize onlyprint noleadingslash notrailingslash nospace preferedlower)
+	while true; do
+		echo >&2
+		print_list "${2}"
+		ask "${1}" "[${DEFAULT}]"
 
-if [ "${OB_TYPE}" = yocto ]
-then
-    OB_POKY_DIR=$(ask_value "What is the path of the poky directory?" "platform/poky" \
-        | sanitize onlyprint noleadingslash notrailingslash nospace preferedlower)
+		read -r VALUE
 
-    if [ "${OB_YOCTO_OE}" = yes ]
-    then
-        OB_OE_DIR=$(ask_value "What is the path of the meta-openembedded directory?" "platform/meta-openembedded" \
-            | sanitize onlyprint noleadingslash notrailingslash nospace preferedlower)
-    fi
-fi
+		SAFE_VALUE=$(check_value "${2}" "${VALUE}" "${DEFAULT}")
 
-if [ "${OB_GIT_TYPE}" = repo ]
-then
-    OB_ROOT_FILE=$(ask_value "What is the name of the openbar root file?" "openbar.mk" \
-        | sanitize onlyprint noleadingslash notrailingslash nospace preferedlower)
-else
-    OB_ROOT_FILE="Makefile"
-fi
+		if [ -z "${SAFE_VALUE}" ]; then
+			red >&2 "Invalid response: ${VALUE}"
+		else
+			echo "${SAFE_VALUE}"
+			return 0
+		fi
+	done
+}
 
-OB_DEFCONFIG_FILE=$(ask_value "What is the name of the default configuration file?" "${OB_NAME}_defconfig" \
-    | sanitize onlyprint noslash nospace trailingdefconfig preferedlower)
+## sanitize <option>...
+sanitize() {
+	VALUE="$(cat)"
 
-OB_GIT_BRANCH=$(ask_value "What is the name of the git branch?" "main" \
-    | sanitize onlyprint noleadingslash notrailingslash nospace preferedlower)
+	# Protect against CTRL-D
+	if [ -z "${VALUE}" ]; then
+		red >&2 "Invalid empty value"
+		exit 1
+	fi
 
-if ask_yesno "Do you want to configure the git remote?" "no"
-then
-    OB_GIT_REMOTE=yes
+	for OPTION in "${@}"; do
+		unset PROMPT_NEQ
+		unset PROMPT
 
-    OB_GIT_BASEURL=$(ask_value "What is the git base url?" "https://github.com")
-fi
+		OLD_VALUE="${VALUE}"
 
-OB_OUTPUT_DIR=$(ask_value "What is the output directory?" "." \
-    | sanitize onlyprint notrailingslash)
+		case ${OPTION} in
 
-### Generate the specified project
+		onlyprint)
+			PROMPT_NEQ="Only printable character allowed"
+			VALUE=$(echo "${VALUE}" | sed -e "s/[^[[:print:]]]//g")
+			;;
+
+		noslash)
+			PROMPT_NEQ="Slash character not allowed"
+			VALUE=$(echo "${VALUE}" | sed -e "s:/::g")
+			;;
+
+		noleadingslash)
+			PROMPT_NEQ="Leading slash character not allowed"
+			VALUE=$(echo "${VALUE}" | sed -e "s:^/::")
+			;;
+
+		notrailingslash)
+			PROMPT_NEQ="Trailing slash character not allowed"
+			VALUE=$(echo "${VALUE}" | sed -e "s:/$::")
+			;;
+
+		nospace)
+			PROMPT_NEQ="Space character not allowed"
+			VALUE=$(echo "${VALUE}" | sed -e "s/[[:space:]]//g")
+			;;
+
+		trailingdefconfig)
+			PROMPT_NEQ="Trailing '_defconfig' is mandatory"
+			VALUE=$(echo "${VALUE}" | sed -e "s/_defconfig$//" -e "s/$/_defconfig/")
+			;;
+
+		preferedlower)
+			echo "${VALUE}" | grep -q "[[:upper:]]" &&
+				PROMPT="Using lowercase characters is recommended"
+			;;
+
+		*)
+			PROMPT="Invalid option ${OPTION}"
+			;;
+		esac
+
+		if [ -n "${PROMPT_NEQ}" ] && [ "${OLD_VALUE}" != "${VALUE}" ]; then
+			PROMPT=$(red "${PROMPT_NEQ}:")
+			echo >&2 "${PROMPT} '${OLD_VALUE}' -> '${VALUE}'"
+
+		elif [ -n "${PROMPT}" ]; then
+			red >&2 "${PROMPT}"
+		fi
+	done
+
+	echo "${VALUE}"
+}
 
 ## create_dockerfile_standard <directory>
-create_dockerfile_standard()
-{
-    mkdir -p ${1}/container/default
-    cat > ${1}/container/default/Dockerfile << "EOF"
+create_dockerfile_standard() {
+	mkdir -p "${1}/container/default"
+	cat <<"EOF" >"${1}/container/default/Dockerfile"
 FROM	debian:bookworm-slim
 
 RUN	set -x \
@@ -310,10 +225,9 @@ EOF
 }
 
 ## create_dockerfile_yocto <directory>
-create_dockerfile_yocto()
-{
-    mkdir -p ${1}/container/default
-    cat > ${1}/container/default/Dockerfile << "EOF"
+create_dockerfile_yocto() {
+	mkdir -p "${1}/container/default"
+	cat <<"EOF" >"${1}/container/default/Dockerfile"
 FROM	debian:bookworm-slim
 
 ENV	LANG en_US.utf8
@@ -342,18 +256,16 @@ EOF
 }
 
 ## create_defconfig_standard <directory>
-create_defconfig_standard()
-{
-    cat > ${1}/${OB_DEFCONFIG_FILE} << "EOF"
+create_defconfig_standard() {
+	cat <<"EOF" >"${1}/${OB_DEFCONFIG_FILE}"
 build:
 	echo "Nothing to do"
 EOF
 }
 
 ## create_defconfig_yocto <directory>
-create_defconfig_yocto()
-{
-    cat > ${1}/${OB_DEFCONFIG_FILE} << "EOF"
+create_defconfig_yocto() {
+	cat <<"EOF" >"${1}/${OB_DEFCONFIG_FILE}"
 DISTRO  := poky
 IMAGE   := core-image-minimal
 MACHINE := qemux86-64
@@ -371,11 +283,10 @@ EOF
 }
 
 ## create_openbar_root_standard <directory>
-create_openbar_root_standard()
-{
-    local FILE=${1}/${OB_ROOT_FILE}
-    mkdir -p $(dirname ${FILE})
-    cat > ${FILE} << EOF
+create_openbar_root_standard() {
+	FILE="${1}/${OB_ROOT_FILE}"
+	mkdir -p "$(dirname "${FILE}")"
+	cat <<EOF >"${FILE}"
 ### DO NOT EDIT THIS FILE ###
 export OB_TYPE          := standard
 export OB_DEFCONFIG_DIR := \${CURDIR}/${OB_CONFIGS_DIR}
@@ -387,11 +298,10 @@ EOF
 }
 
 ## create_openbar_root_yocto <directory>
-create_openbar_root_yocto()
-{
-    local FILE=${1}/${OB_ROOT_FILE}
-    mkdir -p $(dirname ${FILE})
-    cat > ${FILE} << EOF
+create_openbar_root_yocto() {
+	FILE="${1}/${OB_ROOT_FILE}"
+	mkdir -p "$(dirname "${FILE}")"
+	cat <<EOF >"${FILE}"
 ### DO NOT EDIT THIS FILE ###
 export OB_TYPE              := yocto
 export OB_DEFCONFIG_DIR     := \${CURDIR}/${OB_CONFIGS_DIR}
@@ -404,12 +314,11 @@ EOF
 }
 
 ## create_manifest_standard <directory>
-create_manifest_standard()
-{
-    local CONFIG_TOPDIR=$(dirname ${OB_GIT_MAIN_PATH})
-    local ORIGIN_FETCH=$(realpath -m --relative-to=${CONFIG_TOPDIR:-.} .)
+create_manifest_standard() {
+	CONFIG_TOPDIR=$(dirname "${OB_GIT_MAIN_PATH}")
+	ORIGIN_FETCH=$(realpath -m --relative-to="${CONFIG_TOPDIR:-.}" .)
 
-    cat > ${1}/default.xml << EOF
+	cat <<EOF >"${1}/default.xml"
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest>
   <remote name="origin" fetch="${ORIGIN_FETCH}" />
@@ -427,12 +336,11 @@ EOF
 }
 
 ## create_manifest_yocto <directory>
-create_manifest_yocto()
-{
-    local CONFIG_TOPDIR=$(dirname ${OB_GIT_MAIN_PATH})
-    local ORIGIN_FETCH=$(realpath -m --relative-to=${CONFIG_TOPDIR:-.} .)
+create_manifest_yocto() {
+	CONFIG_TOPDIR=$(dirname "${OB_GIT_MAIN_PATH}")
+	ORIGIN_FETCH=$(realpath -m --relative-to="${CONFIG_TOPDIR:-.}" .)
 
-    cat > ${1}/default.xml << EOF
+	cat <<EOF >"${1}/default.xml"
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest>
   <remote name="origin" fetch="${ORIGIN_FETCH}" />
@@ -449,95 +357,174 @@ create_manifest_yocto()
   <project path="${OB_POKY_DIR}" remote="github" revision="master" name="yoctoproject/poky" />
 EOF
 
-    if [ "${OB_YOCTO_OE}" = yes ]
-    then
-        cat >> ${1}/default.xml << EOF
+	if [ "${OB_YOCTO_OE}" = yes ]; then
+		cat <<EOF >>"${1}/default.xml"
   <project path="${OB_OE_DIR}" remote="github" revision="master" name="openembedded/meta-openembedded" />
 EOF
-    fi
+	fi
 
-    cat >> ${1}/default.xml << EOF
+	cat <<EOF >>"${1}/default.xml"
 </manifest>
 EOF
 }
 
 ## create_gitignore_submodule <directory>
-create_gitignore_submodule()
-{
-    cat > ${1}/.gitignore << EOF
+create_gitignore_submodule() {
+	cat <<EOF >"${1}/.gitignore"
 /.config*
 EOF
 }
 
-## create_project <directory>
-create_project()
-{(
-    echo && cd ${1}
+## create_project
+create_project() {
+	echo
 
-    echo "Creating git directory..."
-    mkdir -p ${OB_GIT_MAIN_PATH} ${OB_GIT_MANIFEST_PATH}
+	echo "Creating git directory..."
+	mkdir -p "${OB_GIT_MAIN_PATH}" "${OB_GIT_MANIFEST_PATH}"
 
-    echo "Initializing git directory..."
-    for DIR in $(echo ${OB_GIT_MAIN_PATH} ${OB_GIT_MANIFEST_PATH} | tr " " "\n" | sort -u)
-    do
-        git -C ${DIR} init --quiet
-    done
+	echo "Initializing git directory..."
+	for DIR in $(echo "${OB_GIT_MAIN_PATH}" "${OB_GIT_MANIFEST_PATH}" | tr " " "\n" | sort -u); do
+		git -C "${DIR}" init --quiet
+	done
 
-    if [ "${OB_GIT_TYPE}" = submodule ]
-    then
-        local CONFIGS_DIR=${OB_GIT_MAIN_PATH}/${OB_CONFIGS_DIR}
-        local ROOT_DIR=${OB_GIT_MAIN_PATH}
+	if [ "${OB_GIT_TYPE}" = submodule ]; then
+		CONFIGS_DIR=${OB_GIT_MAIN_PATH}/${OB_CONFIGS_DIR}
+		ROOT_DIR=${OB_GIT_MAIN_PATH}
 
-        echo "Adding openbar submodule..."
-        git -C ${OB_GIT_MAIN_PATH} submodule --quiet add "${OB_REPOSITORY_URL}" ${OB_OPENBAR_DIR}
-        git -C ${OB_GIT_MAIN_PATH}/${OB_OPENBAR_DIR} checkout --quiet ${OB_VERSION}
+		echo "Adding openbar submodule..."
+		git -C "${OB_GIT_MAIN_PATH}" submodule --quiet add "${OB_REPOSITORY_URL}" "${OB_OPENBAR_DIR}"
+		git -C "${OB_GIT_MAIN_PATH}/${OB_OPENBAR_DIR}" checkout --quiet "${OB_VERSION}"
 
-        if [ -n "${OB_POKY_DIR}" ]
-        then
-            echo "Adding poky submodule..."
-            git -C ${OB_GIT_MAIN_PATH} submodule --quiet add "https://git.yoctoproject.org/poky" ${OB_POKY_DIR}
-        fi
+		if [ -n "${OB_POKY_DIR}" ]; then
+			echo "Adding poky submodule..."
+			git -C "${OB_GIT_MAIN_PATH}" submodule --quiet add "https://git.yoctoproject.org/poky" "${OB_POKY_DIR}"
+		fi
 
-        if [ -n "${OB_OE_DIR}" ]
-        then
-            echo "Adding meta-openembedded submodule..."
-            git -C ${OB_GIT_MAIN_PATH} submodule --quiet add "https://git.openembedded.org/meta-openembedded" ${OB_OE_DIR}
-        fi
+		if [ -n "${OB_OE_DIR}" ]; then
+			echo "Adding meta-openembedded submodule..."
+			git -C "${OB_GIT_MAIN_PATH}" submodule --quiet add "https://git.openembedded.org/meta-openembedded" "${OB_OE_DIR}"
+		fi
 
-        create_gitignore_submodule ${ROOT_DIR}
+		create_gitignore_submodule "${ROOT_DIR}"
 
-    elif [ "${OB_GIT_TYPE}" = repo ]
-    then
-        local CONFIGS_DIR=${OB_GIT_MAIN_PATH}
-        local ROOT_DIR=${CONFIGS_DIR}
+	elif [ "${OB_GIT_TYPE}" = repo ]; then
+		CONFIGS_DIR=${OB_GIT_MAIN_PATH}
+		ROOT_DIR=${CONFIGS_DIR}
 
-        echo "Creating manifest..."
-        create_manifest_${OB_TYPE} ${OB_GIT_MANIFEST_PATH}
-    fi
+		echo "Creating manifest..."
+		"create_manifest_${OB_TYPE}" "${OB_GIT_MANIFEST_PATH}"
+	fi
 
-    echo "Creating dockerfile..."
-    create_dockerfile_${OB_TYPE} ${CONFIGS_DIR}
+	echo "Creating dockerfile..."
+	"create_dockerfile_${OB_TYPE}" "${CONFIGS_DIR}"
 
-    echo "Creating defconfig..."
-    create_defconfig_${OB_TYPE} ${CONFIGS_DIR}
+	echo "Creating defconfig..."
+	"create_defconfig_${OB_TYPE}" "${CONFIGS_DIR}"
 
-    echo "Creating openbar root file..."
-    create_openbar_root_${OB_TYPE} ${ROOT_DIR}
+	echo "Creating openbar root file..."
+	"create_openbar_root_${OB_TYPE}" "${ROOT_DIR}"
 
-    echo "Creating initial commit..."
-    for DIR in $(echo ${OB_GIT_MAIN_PATH} ${OB_GIT_MANIFEST_PATH} | tr " " "\n" | sort -u)
-    do
-        git -C ${DIR} add -A
-        git -C ${DIR} commit --quiet -m "initial commit"
-        git -C ${DIR} branch --quiet -M ${OB_GIT_BRANCH}
+	echo "Creating initial commit..."
+	for DIR in $(echo "${OB_GIT_MAIN_PATH}" "${OB_GIT_MANIFEST_PATH}" | tr " " "\n" | sort -u); do
+		git -C "${DIR}" add -A
+		git -C "${DIR}" commit --quiet -m "initial commit"
+		git -C "${DIR}" branch --quiet -M "${OB_GIT_BRANCH}"
 
-        if [ "${OB_GIT_REMOTE}" = yes ]
-        then
-            git -C ${DIR} remote add origin ${OB_GIT_BASEURL}/${DIR}
-        fi
-    done
-)}
+		if [ "${OB_GIT_REMOTE}" = yes ]; then
+			git -C "${DIR}" remote add origin "${OB_GIT_BASEURL}/${DIR}"
+		fi
+	done
+}
 
-create_project ${TMP_DIR}
-mkdir -p ${OB_OUTPUT_DIR}
-mv ${TMP_DIR}/* ${OB_OUTPUT_DIR}
+main() {
+	# Ask the required configuration for the project
+
+	OB_NAME=$(ask_value "What is the name of your project?" |
+		sanitize onlyprint noslash nospace preferedlower)
+
+	OB_TYPE=$(ask_select "What type of project is it?" "standard:yocto" "standard")
+
+	OB_GIT_TYPE=$(ask_select "How do you want to manage the git repositories?" "submodule:repo" "repo")
+
+	if [ "${OB_GIT_TYPE}" = repo ]; then
+		OB_GIT_MAIN_PATH_DEFAULT="${OB_NAME}/configs"
+
+		if ask_yesno "Do you want the repo manifest to be stored in a dedicated repository?" "yes"; then
+			OB_REPO_TYPE="split"
+		fi
+	else
+		OB_GIT_MAIN_PATH_DEFAULT="${OB_NAME}"
+	fi
+
+	if [ "${OB_TYPE}" = yocto ]; then
+		OB_OPENBAR_DIR_DEFAULT="platform/openbar"
+
+		if ask_yesno "Do you need meta-openembedded?" "no"; then
+			OB_YOCTO_OE=yes
+		fi
+	else
+		OB_OPENBAR_DIR_DEFAULT="third-party/openbar"
+	fi
+
+	OB_GIT_MAIN_PATH=$(ask_value "What is the path of the main git repository?" "${OB_GIT_MAIN_PATH_DEFAULT}" |
+		sanitize onlyprint noleadingslash notrailingslash nospace preferedlower)
+
+	if [ "${OB_REPO_TYPE}" = split ]; then
+		OB_GIT_MANIFEST_PATH=$(ask_value "What is the path of the manifest git repository?" "${OB_NAME}/manifest" |
+			sanitize onlyprint noleadingslash notrailingslash nospace preferedlower)
+	else
+		OB_GIT_MANIFEST_PATH="${OB_GIT_MAIN_PATH}"
+	fi
+
+	OB_CONFIGS_DIR=$(ask_value "What is the path of the configuration directory?" "configs" |
+		sanitize onlyprint noleadingslash notrailingslash nospace preferedlower)
+
+	OB_OPENBAR_DIR=$(ask_value "What is the path of the openbar directory?" "${OB_OPENBAR_DIR_DEFAULT}" |
+		sanitize onlyprint noleadingslash notrailingslash nospace preferedlower)
+
+	if [ "${OB_TYPE}" = yocto ]; then
+		OB_POKY_DIR=$(ask_value "What is the path of the poky directory?" "platform/poky" |
+			sanitize onlyprint noleadingslash notrailingslash nospace preferedlower)
+
+		if [ "${OB_YOCTO_OE}" = yes ]; then
+			OB_OE_DIR=$(ask_value "What is the path of the meta-openembedded directory?" "platform/meta-openembedded" |
+				sanitize onlyprint noleadingslash notrailingslash nospace preferedlower)
+		fi
+	fi
+
+	if [ "${OB_GIT_TYPE}" = repo ]; then
+		OB_ROOT_FILE=$(ask_value "What is the name of the openbar root file?" "openbar.mk" |
+			sanitize onlyprint noleadingslash notrailingslash nospace preferedlower)
+	else
+		OB_ROOT_FILE="Makefile"
+	fi
+
+	OB_DEFCONFIG_FILE=$(ask_value "What is the name of the default configuration file?" "${OB_NAME}_defconfig" |
+		sanitize onlyprint noslash nospace trailingdefconfig preferedlower)
+
+	OB_GIT_BRANCH=$(ask_value "What is the name of the git branch?" "main" |
+		sanitize onlyprint noleadingslash notrailingslash nospace preferedlower)
+
+	if ask_yesno "Do you want to configure the git remote?" "no"; then
+		OB_GIT_REMOTE=yes
+
+		OB_GIT_BASEURL=$(ask_value "What is the git base url?" "git@github.com:")
+	fi
+
+	OB_OUTPUT_DIR=$(ask_value "What is the output directory?" "." |
+		sanitize onlyprint notrailingslash)
+
+	# Generate the specified project
+
+	(
+		cd "${TMP_DIR}" || exit 1
+		create_project "${TMP_DIR}"
+	)
+
+	mkdir -p "${OB_OUTPUT_DIR}"
+	mv "${TMP_DIR}/"* "${OB_OUTPUT_DIR}"
+}
+
+# This script should be piped into `sh` and so the stdin will be lost.
+# Reconnect it explicitly to /dev/tty.
+(main) </dev/tty
