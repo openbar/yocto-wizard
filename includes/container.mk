@@ -41,7 +41,7 @@ CONTAINER_ENV_VARIABLES :=
 define export-variable
   ifdef ${1}
     ifeq ($(origin ${1}),$(filter $(origin ${1}),environment command line))
-      CONTAINER_ENV_VARIABLES += -e ${1}=${${1}}
+      CONTAINER_ENV_VARIABLES += -e ${1}="${${1}}"
     endif
   endif
 endef
