@@ -107,6 +107,11 @@ ifdef SSH_AUTH_SOCK
   endif
 endif
 
+# Also bind the local netrc file.
+ifneq ($(wildcard ${HOME}/.netrc),)
+  CONTAINER_RUN_ARGS += -v ${HOME}/.netrc:${OB_CONTAINER_HOME}/.netrc:ro
+endif
+
 # Mount the root directory as working directory.
 CONTAINER_RUN_ARGS += -w ${OB_ROOT_DIR}
 CONTAINER_RUN_ARGS += -v ${OB_ROOT_DIR}:${OB_ROOT_DIR}
