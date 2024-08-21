@@ -96,14 +96,18 @@ CONTAINER_RUN_ARGS += --hostname ${CONTAINER_HOSTNAME}
 CONTAINER_RUN_ARGS += --add-host ${CONTAINER_HOSTNAME}:127.0.0.1
 
 # Bind the local ssh configuration and authentication.
-CONTAINER_RUN_ARGS += -v ${HOME}/.ssh:${OB_CONTAINER_HOME}/.ssh
-
-ifdef SSH_AUTH_SOCK
-  CONTAINER_RUN_ARGS += -v ${SSH_AUTH_SOCK}:${OB_CONTAINER_HOME}/ssh.socket
-  CONTAINER_RUN_ARGS += -e SSH_AUTH_SOCK=${OB_CONTAINER_HOME}/ssh.socket
+ifneq ($(wildcard ${HOME}/.ssh),)
+  CONTAINER_RUN_ARGS += -v ${HOME}/.ssh:${OB_CONTAINER_HOME}/.ssh:ro
 endif
 
-# Mount the repo directory as working directory.
+ifdef SSH_AUTH_SOCK
+  ifneq ($(wildcard ${SSH_AUTH_SOCK}),)
+    CONTAINER_RUN_ARGS += -v ${SSH_AUTH_SOCK}:${OB_CONTAINER_HOME}/ssh.socket:ro
+    CONTAINER_RUN_ARGS += -e SSH_AUTH_SOCK=${OB_CONTAINER_HOME}/ssh.socket
+  endif
+endif
+
+# Mount the root directory as working directory.
 CONTAINER_RUN_ARGS += -w ${OB_ROOT_DIR}
 CONTAINER_RUN_ARGS += -v ${OB_ROOT_DIR}:${OB_ROOT_DIR}
 
