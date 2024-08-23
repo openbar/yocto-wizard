@@ -20,7 +20,7 @@ useradd \
 	docker
 
 # Adjust rights for the user home
-chown -R docker:docker ${OB_DOCKER_HOME}
+chown docker:docker ${OB_DOCKER_HOME}
 
 # Execute the command as docker
 exec runuser -u docker -- "$@"
