@@ -27,7 +27,7 @@ CONTAINER_TAG         := ${CONTAINER_IMAGE}:$(call container-sanitize,${USER})
 CONTAINER_HOSTNAME    := $(subst /,-,${CONTAINER_IMAGE})
 
 # Mount the required volumes if not already done.
-override OB_CONTAINER_VOLUMES += ${OB_BUILD_DIR}
+override OB_CONTAINER_VOLUMES += ${OPENBAR_DIR} ${OB_BUILD_DIR}
 
 ifeq (${OB_TYPE},yocto)
   override OB_CONTAINER_VOLUMES += ${DEPLOY_DIR} ${DL_DIR} ${SSTATE_DIR}
