@@ -49,7 +49,7 @@ endef
 $(call foreach-eval,${OB_CONTAINER_EXPORT_VARIABLES},export-variable)
 
 # Mount the required volumes if not already done.
-override OB_CONTAINER_VOLUMES += ${OB_BUILD_DIR}
+override OB_CONTAINER_VOLUMES += ${OPENBAR_DIR} ${OB_BUILD_DIR}
 
 ifeq (${OB_TYPE},yocto)
   override OB_CONTAINER_VOLUMES += ${DEPLOY_DIR} ${DL_DIR} ${SSTATE_DIR}
