@@ -11,7 +11,7 @@
 OPENBAR_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST}))/..)
 
 # Ensure the type has been set.
-export OB_TYPE ?= standard
+export OB_TYPE ?= simple
 
 # The base directory where the root makefile is located.
 export OB_ROOT_DIR := ${CURDIR}

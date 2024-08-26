@@ -31,7 +31,7 @@ project by providing deterministic and immutable environments.
 * Although the final user interface is quite restrictive, the project
   configuration is very flexible and has some powerful features:
 
-  * Configurable project type (standard, yocto).
+  * Configurable project type (simple, yocto).
 
   * Configurable project path (defconfig files, docker files, poky).
 

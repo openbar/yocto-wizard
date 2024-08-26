@@ -3,7 +3,7 @@
 
 ifndef OB_TYPE
   $(error The variable OB_TYPE must be specified in the environment)
-else ifneq ($(filter ${OB_TYPE},standard yocto),${OB_TYPE})
+else ifneq ($(filter ${OB_TYPE},simple yocto),${OB_TYPE})
   $(error Invalid value for OB_TYPE: ${OB_TYPE})
 endif
 
