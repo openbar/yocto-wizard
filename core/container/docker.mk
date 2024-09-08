@@ -8,7 +8,7 @@
 # - binding the local ssh configuration.
 
 # The openbar directory. This must be done before any includes.
-OPENBAR_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST}))/..)
+OPENBAR_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST}))/../..)
 
 # Include the common makefiles.
 include ${OPENBAR_DIR}/includes/verify-environment.mk
@@ -55,10 +55,10 @@ DOCKER_RUN += ${CONTAINER_TAG}
 # All targets are forwarded to the next layer inside the docker.
 ${OB_ALL_TARGETS}: .forward
 
-ifeq (${OB_TYPE}, yocto)
-  NEXT_LAYER := ${OPENBAR_DIR}/core/bitbake-init-build-env.mk
+ifeq (${OB_TYPE}, simple)
+  NEXT_LAYER := ${OPENBAR_DIR}/core/type/simple.mk
 else
-  NEXT_LAYER := ${OPENBAR_DIR}/core/config.mk
+  NEXT_LAYER := ${OPENBAR_DIR}/core/type/initenv.mk
 endif
 
 .PHONY: .forward

@@ -3,8 +3,8 @@
 # The main layer is the entry point and is responsible for:
 # - handling the command line options.
 # - handling the default configuration targets.
-# - handling the help targets.
-# - handling the special "foreach" target.
+# - handling the help target.
+# - handling the special foreach target.
 # - forwarding the other targets to the container layer.
 
 # The openbar directory. This must be done before any includes.
@@ -100,9 +100,9 @@ else
       .PHONY: .forward
       .forward:
       ifeq (${OB_CONTAINER_ENGINE},docker)
-	${MAKE} -f ${OPENBAR_DIR}/core/docker.mk ${MAKECMDGOALS}
+	${MAKE} -f ${OPENBAR_DIR}/core/container/docker.mk ${MAKECMDGOALS}
       else
-	${MAKE} -f ${OPENBAR_DIR}/core/podman.mk ${MAKECMDGOALS}
+	${MAKE} -f ${OPENBAR_DIR}/core/container/podman.mk ${MAKECMDGOALS}
       endif
     endif
   endif

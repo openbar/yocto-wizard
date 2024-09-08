@@ -11,36 +11,73 @@ logger = logging.getLogger(__name__)
 logging.getLogger("sh").setLevel(logging.WARNING)
 
 
-@pytest.fixture(autouse=True)
-def _check_container_engine(request):
-    markers = [m.name for m in request.node.iter_markers()]
+def command_is_available(command_name):
+    try:
+        sh.Command(command_name)
+        return True
+    except sh.CommandNotFound:
+        return False
 
-    def check_command(name):
-        try:
-            sh.Command(name)
-            return True
-        except sh.CommandNotFound:
-            if name in markers:
-                pytest.skip(f"The command '{name}' is not available")
-            return False
 
-    docker_available = check_command("docker")
-    podman_available = check_command("podman")
+CONTAINER_ENGINES = ["docker", "podman"]
+CONTAINER_ENGINE_MARKERS = ["no_container_engine", *CONTAINER_ENGINES]
 
-    if not docker_available and not podman_available:
+
+@pytest.fixture(scope="session")
+def available_container_engines():
+    engines = []
+
+    for engine in CONTAINER_ENGINES:
+        if command_is_available(engine):
+            engines.append(engine)
+
+    if not engines:
         raise RuntimeError("No container engine available")
+
+    return engines
+
+
+def pytest_generate_tests(metafunc):
+    markers = [m.name for m in metafunc.definition.iter_markers()]
+    engine_markers = [m for m in markers if m in CONTAINER_ENGINE_MARKERS]
+
+    if len(engine_markers) > 1:
+        raise RuntimeError(
+            f"One container engine marker expected, got {engine_markers}"
+        )
+
+    if "no_container_engine" in engine_markers:
+        metafunc.parametrize("container_engine", [None])
+    elif not engine_markers:
+        metafunc.parametrize("container_engine", CONTAINER_ENGINES)
+    else:
+        metafunc.parametrize("container_engine", engine_markers)
+
+
+@pytest.fixture(autouse=True)
+def _container_engine_guard(request, available_container_engines):
+    markers = [m.name for m in request.node.iter_markers()]
+    engine_markers = [m for m in markers if m in CONTAINER_ENGINE_MARKERS]
+
+    if "no_container_engine" in engine_markers:
+        return
+
+    engine = request.getfixturevalue("container_engine")
+
+    if engine not in available_container_engines:
+        pytest.skip(f"The container engine '{engine}' is not available")
 
 
 @pytest.fixture
 def project_config(request, tmp_path):
     openbar_dir = request.config.rootpath
+    data_dir = openbar_dir / "tests/data"
     return {
         "type": "simple",
         "root_dir": tmp_path,
         "openbar_dir": openbar_dir,
-        "data_dir": openbar_dir / "tests/data",
-        "defconfig_dir": openbar_dir / "tests/data",
-        "container_dir": openbar_dir / "tests/data/container",
+        "defconfig_dir": data_dir,
+        "container_dir": data_dir / "container",
     }
 
 
@@ -80,26 +117,37 @@ class Project:
         with open(path, "w", encoding="utf-8") as stream:
             stream.write(dedent(data))
 
-    def make(self, *args, **kwargs):
-        cli = kwargs.get("cli", self.get("cli", {}))
-        env = kwargs.get("env", self.get("env", {}))
+    def run(self, command_name, *args, **kwargs):
+        cli = kwargs.pop("cli", self.get("cli", {}))
+        env = kwargs.pop("env", self.get("env", {}))
 
-        make_args = [
-            "--no-print-directory",
-            "-C",
-            self.root_dir,
+        command_args = [
             *args,
             *[f"{str(k).upper()}={quote(str(v))}" for k, v in cli.items()],
         ]
 
-        make_env = {**os.environ, **{str(k): str(v) for k, v in env.items()}}
+        command_env = {**os.environ, **{str(k): str(v) for k, v in env.items()}}
 
-        return sh.make(*make_args, _env=make_env)
+        command_env["LC_ALL"] = "C"
+
+        if engine := self.get("container_engine"):
+            command_env["OB_CONTAINER_ENGINE"] = engine
+
+        command = sh.Command(command_name)
+
+        return command(*command_args, _env=command_env, **kwargs)
+
+    def make(self, *args, **kwargs):
+        return self.run(
+            "make", "--no-print-directory", "-C", self.root_dir, *args, **kwargs
+        )
 
 
 @pytest.fixture
-def create_project(project_config):
+def create_project(request, project_config):
+    engine = request.getfixturevalue("container_engine")
+
     def _create_project(**kwargs):
-        return Project(project_config=project_config, **kwargs)
+        return Project(project_config=project_config, container_engine=engine, **kwargs)
 
     return _create_project
