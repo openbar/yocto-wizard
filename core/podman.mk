@@ -3,7 +3,6 @@
 # The podman layer is responsible for:
 # - building the specified podman image.
 # - running the resulting podman image.
-# - exporting the required environment variables.
 # - mounting the required volumes.
 # - binding the local user and group.
 # - binding the local ssh configuration.

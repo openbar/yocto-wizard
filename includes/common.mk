@@ -39,33 +39,7 @@ foreach-eval = $(foreach element,$(sort ${1}),$(eval $(call ${2},${element})))
 # To interpret and analyze the configuration file, it is read as a makefile
 # and its database (the resulting variables and targets) is printed (option -p).
 # The same approach is used by /usr/share/bash-completion/completions/make.
-#
-# The $(shell) function is used to make the call. But the $(shell) invoked does
-# not inherit the internal environment. And therefore, is not able to see the
-# internal variables (like OB_ROOT_DIR).
-#
-# So each variables which needs to be exported have to be added in the command
-# line. The OB_CONFIG_EXPORT_VARIABLES variable lists all the variables that will
-# be exported to the configuration file. This variable can be appended by the
-# user.
 CONFIG_MAKE := ${MAKE} MAKE=true
-
-override OB_CONFIG_EXPORT_VARIABLES += OB_TYPE OB_ROOT_DIR OB_BUILD_DIR
-override OB_CONFIG_EXPORT_VARIABLES += OB_VERBOSE OB_DEFCONFIG_DIR
-override OB_CONFIG_EXPORT_VARIABLES += OB_CONTAINER_DIR OB_CONTAINER_HOME
-
-ifeq (${OB_TYPE},yocto)
-  override OB_CONFIG_EXPORT_VARIABLES += OB_BB_INIT_BUILD_ENV
-  override OB_CONFIG_EXPORT_VARIABLES += DEPLOY_DIR DL_DIR SSTATE_DIR DISTRO MACHINE
-endif
-
-define config-export-variable
-  ifdef ${1}
-    CONFIG_MAKE += ${1}=${${1}}
-  endif
-endef
-
-$(call foreach-eval,${OB_CONFIG_EXPORT_VARIABLES},config-export-variable)
 
 ## config-parse <script>
 # Parse the configuration file using a specified <script>.

@@ -3,7 +3,6 @@
 # The docker layer is responsible for:
 # - building the specified docker image.
 # - running the resulting docker image.
-# - exporting the required environment variables.
 # - mounting the required volumes.
 # - binding the local user and group.
 # - binding the local ssh configuration.

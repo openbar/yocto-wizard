@@ -24,9 +24,3 @@ endif
 # Add the "shell" target.
 shell:
 	${SHELL}
-
-# Export all variables
-export
-
-# But keep internal variables private
-unexport EMPTY COMMA COLON SPACE VERTICALTAB NEWLINE CONFIG_MAKE

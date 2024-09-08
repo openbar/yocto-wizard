@@ -1,7 +1,6 @@
 # The oe-init-build-env layer.
 #
 # The oe-init-build-env layer is responsible for:
-# - exporting the required variables to bitbake.
 # - cleaning the bitbake layer configuration.
 # - initializing the bitbake environment.
 
@@ -18,22 +17,6 @@ ifeq ($(realpath ${CONFIG}),)
 else
   $(call config-load-variables)
 endif
-
-# The bitbake variable used to export environment variables to bitbake.
-OB_BB_EXPORT_LIST_VARIABLE ?= BB_ENV_PASSTHROUGH_ADDITIONS
-
-# Export the required variables to bitbake.
-override OB_BB_EXPORT_VARIABLES += OB_ROOT_DIR OB_BUILD_DIR OB_VERBOSE
-override OB_BB_EXPORT_VARIABLES += DEPLOY_DIR DL_DIR SSTATE_DIR DISTRO MACHINE
-
-define export-variable
-  ifdef ${1}
-    export ${1}
-    export ${OB_BB_EXPORT_LIST_VARIABLE} += ${1}
-  endif
-endef
-
-$(call foreach-eval,${OB_BB_EXPORT_VARIABLES},export-variable)
 
 # All targets are forwarded to the bitbake-layers layer.
 ${OB_ALL_TARGETS}: .forward
