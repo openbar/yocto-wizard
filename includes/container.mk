@@ -1,7 +1,3 @@
-## comma-list <list>
-# Convert a space separated list to a comma separated list.
-comma-list = $(subst ${SPACE},${COMMA},$(strip ${1}))
-
 ## container-sanitize <string>
 # Sanitize a string to be used as a container name or tag.
 container-sanitize = $(shell echo ${1} | awk -f ${OPENBAR_DIR}/scripts/container-sanitize.awk)

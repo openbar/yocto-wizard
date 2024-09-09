@@ -43,7 +43,7 @@ DOCKER_RUN += -e OB_DOCKER_UID=$$(id -u)
 DOCKER_RUN += -e OB_DOCKER_GID=$$(id -g)
 
 ifdef OB_DOCKER_GROUPS
-  DOCKER_RUN += -e OB_DOCKER_GROUPS=$(call comma-list,${OB_DOCKER_GROUPS})
+  DOCKER_RUN += -e OB_DOCKER_GROUPS="${OB_DOCKER_GROUPS}"
 endif
 
 # Add optional extra arguments.
