@@ -22,6 +22,21 @@ CONTAINER_IMAGE       := ${CONTAINER_PROJECT}/$(call container-sanitize,${OB_CON
 CONTAINER_TAG         := ${CONTAINER_IMAGE}:$(call container-sanitize,${USER})
 CONTAINER_HOSTNAME    := $(subst /,-,${CONTAINER_IMAGE})
 
+# Export the required environment variables.
+override OB_CONTAINER_EXPORT_VARIABLES += OB_TYPE OB_ROOT_DIR OB_BUILD_DIR OB_VERBOSE
+override OB_CONTAINER_EXPORT_VARIABLES += OB_DEFCONFIG_DIR OB_CONTAINER_DIR
+
+CONTAINER_ENV_VARIABLES :=
+define export-variable
+  ifdef ${1}
+    ifeq ($(origin ${1}),$(filter $(origin ${1}),environment command line))
+      CONTAINER_ENV_VARIABLES += -e ${1}="${${1}}"
+    endif
+  endif
+endef
+
+$(call foreach-eval,${OB_CONTAINER_EXPORT_VARIABLES},export-variable)
+
 # Mount the required volumes if not already done.
 override OB_CONTAINER_VOLUMES += ${OPENBAR_DIR} ${OB_BUILD_DIR}
 
@@ -89,6 +104,9 @@ endif
 # Mount the root directory as working directory.
 CONTAINER_RUN_ARGS += -w ${OB_ROOT_DIR}
 CONTAINER_RUN_ARGS += -v ${OB_ROOT_DIR}:${OB_ROOT_DIR}
+
+# Export the required environment variables.
+CONTAINER_RUN_ARGS += ${CONTAINER_ENV_VARIABLES}
 
 # Mount the required volumes.
 CONTAINER_RUN_ARGS += ${CONTAINER_VOLUMES}

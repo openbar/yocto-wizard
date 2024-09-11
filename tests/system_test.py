@@ -8,30 +8,30 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.no_container_engine
 def test_gnu_make():
-    version = sh.make("--version")
-    logger.info(version.splitlines()[0])
-    assert str(version).startswith("GNU Make")
+    stdout = sh.make("--version").splitlines()
+    logger.info(stdout[0])
+    assert stdout[0].lower().startswith("gnu make")
 
 
 @pytest.mark.no_container_engine
 def test_gnu_awk():
-    version = sh.awk("--version")
-    logger.info(version.splitlines()[0])
-    assert str(version).startswith("GNU Awk")
+    stdout = sh.awk("--version").splitlines()
+    logger.info(stdout[0])
+    assert stdout[0].lower().startswith("gnu awk")
 
 
 @pytest.mark.docker
 def test_docker():
-    version = sh.docker("--version")
-    logger.info(version.splitlines()[0])
-    assert str(version).startswith("Docker")
+    stdout = sh.docker("--version").splitlines()
+    logger.info(stdout[0])
+    assert stdout[0].lower().startswith("docker")
 
 
 @pytest.mark.podman
 def test_podman():
-    version = sh.podman("--version")
-    logger.info(version.splitlines()[0])
-    assert str(version).startswith("podman")
+    stdout = sh.podman("--version").splitlines()
+    logger.info(stdout[0])
+    assert stdout[0].lower().startswith("podman")
 
 
 @pytest.mark.no_container_engine
@@ -47,13 +47,12 @@ def test_project_fixture(create_project):
 
     # Simple command
     stdout = project.run("env")
-    assert "FOO=create/cli" in stdout.splitlines()
-    assert "BAR=create/cli" in stdout.splitlines()
-    assert "BAZ=create/env" in stdout.splitlines()
+    for var in ["FOO=create/cli", "BAR=create/cli", "BAZ=create/env"]:
+        assert var in stdout
 
     # Command arguments
     stdout = project.run("env", "-C", project.root_dir, "pwd")
-    assert stdout.strip() == str(project.root_dir)
+    assert stdout[0].strip() == str(project.root_dir)
 
     # Override command line / environment variables
     stdout = project.run(
@@ -61,9 +60,8 @@ def test_project_fixture(create_project):
         cli={"FOO": "run/cli", "BAR": "run/cli"},
         env={"FOO": "run/env", "BAZ": "run/env"},
     )
-    assert "FOO=run/cli" in stdout.splitlines()
-    assert "BAR=run/cli" in stdout.splitlines()
-    assert "BAZ=run/env" in stdout.splitlines()
+    for var in ["FOO=run/cli", "BAR=run/cli", "BAZ=run/env"]:
+        assert var in stdout
 
     # Failing command (pytest)
     with pytest.raises(sh.ErrorReturnCode_1):

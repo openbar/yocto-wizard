@@ -57,10 +57,10 @@ endif
 
 .PHONY: .forward
 .forward: .podman-build | ${CONTAINER_VOLUME_HOSTDIRS}
-	${PODMAN_RUN} \
-		${MAKE} -f ${NEXT_LAYER} $(filter -j%,${MAKEFLAGS}) ${MAKECMDGOALS}
+	$(strip ${PODMAN_RUN} \
+		${MAKE} -f ${NEXT_LAYER} $(filter -j%,${MAKEFLAGS}) ${MAKECMDGOALS})
 
 .PHONY: .podman-build
 .podman-build:
 	echo "Building podman image '${CONTAINER_TAG}'"
-	${QUIET} ${PODMAN_BUILD}
+	${QUIET} $(strip ${PODMAN_BUILD})

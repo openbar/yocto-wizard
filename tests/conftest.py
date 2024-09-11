@@ -135,7 +135,7 @@ class Project:
 
         command = sh.Command(command_name)
 
-        return command(*command_args, _env=command_env, **kwargs)
+        return command(*command_args, _env=command_env, **kwargs).splitlines()
 
     def make(self, *args, **kwargs):
         return self.run(

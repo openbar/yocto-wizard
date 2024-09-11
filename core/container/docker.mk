@@ -63,10 +63,10 @@ endif
 
 .PHONY: .forward
 .forward: .docker-build | ${CONTAINER_VOLUME_HOSTDIRS}
-	${DOCKER_RUN} \
-		${MAKE} -f ${NEXT_LAYER} $(filter -j%,${MAKEFLAGS}) ${MAKECMDGOALS}
+	$(strip ${DOCKER_RUN} \
+		${MAKE} -f ${NEXT_LAYER} $(filter -j%,${MAKEFLAGS}) ${MAKECMDGOALS})
 
 .PHONY: .docker-build
 .docker-build:
 	echo "Building docker image '${CONTAINER_TAG}'"
-	${QUIET} ${DOCKER_BUILD}
+	${QUIET} $(strip ${DOCKER_BUILD})

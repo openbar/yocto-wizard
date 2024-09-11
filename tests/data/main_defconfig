@@ -1,2 +1,9 @@
-hello:
-	echo Hello
+foo:
+	echo Foo
+
+bar:
+	echo Bar
+
+OB_MANUAL_TARGETS += baz
+baz:
+	echo Baz
