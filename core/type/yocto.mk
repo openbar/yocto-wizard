@@ -36,3 +36,10 @@ ifneq ($(strip ${OB_BB_LAYERS}),)
 		${QUIET} bitbake-layers add-layer -F $${LAYER}; \
 	done
 endif
+
+# FIXME
+# The configuration of the bitbake layers must be removed. It will then be
+# rebuilt each time by the following bitbake-layers layer.
+.PHONY: .clean-bblayers
+.clean-bblayers:
+	rm -f ${OB_BUILD_DIR}/conf/bblayers.conf

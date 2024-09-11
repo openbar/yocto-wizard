@@ -52,19 +52,11 @@ DOCKER_RUN += ${OB_DOCKER_RUN_EXTRA_ARGS}
 # Use the previously build image.
 DOCKER_RUN += ${CONTAINER_TAG}
 
-# All targets are forwarded to the next layer inside the docker.
-${OB_ALL_TARGETS}: .forward
-
-ifeq (${OB_TYPE}, simple)
-  NEXT_LAYER := ${OPENBAR_DIR}/core/type/simple.mk
-else
-  NEXT_LAYER := ${OPENBAR_DIR}/core/type/initenv.mk
-endif
-
+# Define the forward target.
 .PHONY: .forward
 .forward: .docker-build | ${CONTAINER_VOLUME_HOSTDIRS}
 	$(strip ${DOCKER_RUN} \
-		${MAKE} -f ${NEXT_LAYER} $(filter -j%,${MAKEFLAGS}) ${MAKECMDGOALS})
+		${MAKE} -f ${CONTAINER_NEXT_LAYER} $(filter -j%,${MAKEFLAGS}) ${MAKECMDGOALS})
 
 .PHONY: .docker-build
 .docker-build:

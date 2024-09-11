@@ -46,19 +46,11 @@ PODMAN_RUN += ${OB_PODMAN_RUN_EXTRA_ARGS}
 # Use the previously build image.
 PODMAN_RUN += ${CONTAINER_TAG}
 
-# All targets are forwarded to the next layer inside the podman.
-${OB_ALL_TARGETS}: .forward
-
-ifeq (${OB_TYPE}, simple)
-  NEXT_LAYER := ${OPENBAR_DIR}/core/type/simple.mk
-else
-  NEXT_LAYER := ${OPENBAR_DIR}/core/type/initenv.mk
-endif
-
+# Define the forward target.
 .PHONY: .forward
 .forward: .podman-build | ${CONTAINER_VOLUME_HOSTDIRS}
 	$(strip ${PODMAN_RUN} \
-		${MAKE} -f ${NEXT_LAYER} $(filter -j%,${MAKEFLAGS}) ${MAKECMDGOALS})
+		${MAKE} -f ${CONTAINER_NEXT_LAYER} $(filter -j%,${MAKEFLAGS}) ${MAKECMDGOALS})
 
 .PHONY: .podman-build
 .podman-build:

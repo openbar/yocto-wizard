@@ -10,6 +10,8 @@ logger = logging.getLogger(__name__)
 
 logging.getLogger("sh").setLevel(logging.WARNING)
 
+CONTAINER_ENGINES = ["docker", "podman"]
+
 
 def command_is_available(command_name):
     try:
@@ -17,10 +19,6 @@ def command_is_available(command_name):
         return True
     except sh.CommandNotFound:
         return False
-
-
-CONTAINER_ENGINES = ["docker", "podman"]
-CONTAINER_ENGINE_MARKERS = ["no_container_engine", *CONTAINER_ENGINES]
 
 
 @pytest.fixture(scope="session")
@@ -37,35 +35,42 @@ def available_container_engines():
     return engines
 
 
-def pytest_generate_tests(metafunc):
-    markers = [m.name for m in metafunc.definition.iter_markers()]
-    engine_markers = [m for m in markers if m in CONTAINER_ENGINE_MARKERS]
-
-    if len(engine_markers) > 1:
-        raise RuntimeError(
-            f"One container engine marker expected, got {engine_markers}"
+def pytest_addoption(parser):
+    group = parser.getgroup("container engines")
+    for engine in CONTAINER_ENGINES:
+        group.addoption(
+            f"--{engine}",
+            action="store_true",
+            help=f"run tests with the {engine} engine",
         )
 
-    if "no_container_engine" in engine_markers:
+
+def pytest_generate_tests(metafunc):
+    all_markers = [m.name for m in metafunc.definition.iter_markers()]
+    markers = [m for m in all_markers if m in CONTAINER_ENGINES]
+
+    if "no_container_engine" in all_markers:
         metafunc.parametrize("container_engine", [None])
-    elif not engine_markers:
+    elif not markers:
         metafunc.parametrize("container_engine", CONTAINER_ENGINES)
     else:
-        metafunc.parametrize("container_engine", engine_markers)
+        metafunc.parametrize("container_engine", markers)
 
 
 @pytest.fixture(autouse=True)
 def _container_engine_guard(request, available_container_engines):
-    markers = [m.name for m in request.node.iter_markers()]
-    engine_markers = [m for m in markers if m in CONTAINER_ENGINE_MARKERS]
+    all_markers = [m.name for m in request.node.iter_markers()]
+    options = [e for e in CONTAINER_ENGINES if request.config.getoption(e)]
 
-    if "no_container_engine" in engine_markers:
+    if "no_container_engine" in all_markers:
         return
 
     engine = request.getfixturevalue("container_engine")
 
     if engine not in available_container_engines:
         pytest.skip(f"The container engine '{engine}' is not available")
+    elif options and engine not in options:
+        pytest.skip(f"The container engine '{engine}' is not enabled")
 
 
 @pytest.fixture
@@ -135,7 +140,11 @@ class Project:
 
         command = sh.Command(command_name)
 
-        return command(*command_args, _env=command_env, **kwargs).splitlines()
+        result = command(*command_args, _env=command_env, **kwargs)
+
+        if kwargs.get("_return_cmd", False):
+            return result
+        return result.splitlines()
 
     def make(self, *args, **kwargs):
         return self.run(

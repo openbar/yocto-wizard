@@ -2,7 +2,7 @@ target-version = "py310"
 
 [lint]
 select = ["A", "C90", "E", "F", "I", "N", "PL", "S", "UP", "W", "PT", "RUF", "SIM"]
-ignore = ["S101"]
+ignore = ["S101", "S108"]
 
 [lint.isort]
 force-single-line = true

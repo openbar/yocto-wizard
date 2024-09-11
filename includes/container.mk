@@ -47,10 +47,8 @@ endif
 CONTAINER_VOLUMES :=
 CONTAINER_VOLUME_HOSTDIRS :=
 define mount-volume
-  ifeq ($(filter ${OB_ROOT_DIR}/%,$(abspath $(call container-volume-hostdir,${1}))),)
-    CONTAINER_VOLUMES += -v $(call container-volume,${1})
-    CONTAINER_VOLUME_HOSTDIRS += $(call container-volume-hostdir,${1})
-  endif
+  CONTAINER_VOLUMES += -v $(call container-volume,${1})
+  CONTAINER_VOLUME_HOSTDIRS += $(call container-volume-hostdir,${1})
 endef
 
 $(call foreach-eval,${OB_CONTAINER_VOLUMES},mount-volume)
@@ -113,3 +111,12 @@ CONTAINER_RUN_ARGS += ${CONTAINER_VOLUMES}
 
 # Add optional extra arguments.
 CONTAINER_RUN_ARGS += ${OB_CONTAINER_RUN_EXTRA_ARGS}
+
+# All targets are forwarded to the next layer.
+${OB_ALL_TARGETS}: .forward
+
+ifeq (${OB_TYPE}, simple)
+  CONTAINER_NEXT_LAYER := ${OPENBAR_DIR}/core/type/simple.mk
+else
+  CONTAINER_NEXT_LAYER := ${OPENBAR_DIR}/core/type/initenv.mk
+endif

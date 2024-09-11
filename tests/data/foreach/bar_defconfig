@@ -1,2 +1,6 @@
-bar:
-	echo Bar
+hello:
+	echo Hello bar
+
+OB_MANUAL_TARGETS += goodbye
+goodbye:
+	echo Goodbye bar

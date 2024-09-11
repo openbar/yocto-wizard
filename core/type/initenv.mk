@@ -22,12 +22,6 @@ endif
 ${OB_ALL_TARGETS}: .forward
 
 .PHONY: .forward
-.forward: .clean-bblayers
+.forward:
 	${QUIET} . ${OB_BB_INIT_BUILD_ENV} ${OB_BUILD_DIR} \
 		&& ${MAKE} -f ${OPENBAR_DIR}/core/bitbake-layers.mk ${MAKECMDGOALS}
-
-# The configuration of the bitbake layers must be removed. It will then be
-# rebuilt each time by the following bitbake-layers layer.
-.PHONY: .clean-bblayers
-.clean-bblayers:
-	rm -f ${OB_BUILD_DIR}/conf/bblayers.conf
