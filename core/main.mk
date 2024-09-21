@@ -10,18 +10,15 @@
 # The openbar directory. This must be done before any includes.
 OPENBAR_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST}))/..)
 
-# Ensure the type has been set.
-export OB_TYPE ?= simple
-
 # The base directory where the root makefile is located.
-export OB_ROOT_DIR := ${CURDIR}
+OB_ROOT_DIR := ${CURDIR}
 
 # Support the O= option in command line.
 ifeq ($(origin O),command line)
   OB_BUILD_DIR := $(abspath ${O})
 endif
 
-export OB_BUILD_DIR ?= ${OB_ROOT_DIR}/build
+OB_BUILD_DIR ?= ${OB_ROOT_DIR}/build
 
 # Support the V= option in command line.
 ifeq ($(origin V),command line)
@@ -30,9 +27,19 @@ ifeq ($(origin V),command line)
   endif
 endif
 
-export OB_VERBOSE ?= 0
+OB_VERBOSE ?= 0
+
+# The container engine to be used.
+OB_CONTAINER_ENGINE ?= podman
+
+# Add all command line variables except O and V to the export list.
+CLI_VARIABLES = $(foreach variable,${.VARIABLES},$(if $(filter command line,$(origin ${variable})),${variable}))
+
+override OB_EXPORT += $(filter-out O V,${CLI_VARIABLES})
 
 # All the required variables have been set.
+include ${OPENBAR_DIR}/includes/verify-environment.mk
+
 # The common makefile can now be included.
 include ${OPENBAR_DIR}/includes/common.mk
 
@@ -88,8 +95,8 @@ ifneq (${HAVE_FOREACH},)
 	else \
 		trap "rm -f ${CONFIG}" EXIT; \
 	fi; \
-	for TARGET in ${DEFCONFIG_TARGETS}; do \
-		${MAKE} $${TARGET} && ${MAKE} ${FOREACH_TARGETS}; \
+	for target in ${DEFCONFIG_TARGETS}; do \
+		${MAKE} $${target} && ${MAKE} ${FOREACH_TARGETS}; \
 	done
 else
   # All configuration targets are forwarded to the container layer.
@@ -99,11 +106,7 @@ else
 
       .PHONY: .forward
       .forward:
-      ifeq (${OB_CONTAINER_ENGINE},docker)
-	${MAKE} -f ${OPENBAR_DIR}/core/docker.mk ${MAKECMDGOALS}
-      else
-	${MAKE} -f ${OPENBAR_DIR}/core/podman.mk ${MAKECMDGOALS}
-      endif
+	$(call submake,container/${OB_CONTAINER_ENGINE}.mk)
     endif
   endif
 endif
@@ -129,10 +132,7 @@ else ifdef CONFIG_ERROR
 else ifeq (${OB_ALL_TARGETS},)
 	@echo '  No command defined'
 else
-	@$(foreach target,$(sort $(filter-out shell,${OB_ALL_TARGETS})),\
-		$(if $(filter ${target},${OB_AUTO_TARGETS}),\
-			echo '* ${target}';,\
-			echo '  ${target}';))
+	@$(foreach target,$(sort $(filter-out shell,${OB_ALL_TARGETS})),$(if $(filter ${target},${OB_AUTO_TARGETS}),echo '* ${target}';,echo '  ${target}';))
 	@echo '  shell'
 endif
 	@echo
@@ -146,5 +146,4 @@ endif
 	@echo 'Command line options:'
 	@echo '  make V=0-1 [targets] 0 => quiet build (default)'
 	@echo '                       1 => verbose build'
-	@echo '  make O=dir [targets] Use the specified build directory' \
-		'(default: build)'
+	@echo '  make O=dir [targets] Use the specified build directory (default: build)'
