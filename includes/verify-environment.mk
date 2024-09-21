@@ -3,7 +3,7 @@
 
 ifndef OB_TYPE
   $(error The variable OB_TYPE must be specified in the environment)
-else ifneq ($(filter ${OB_TYPE},simple yocto),${OB_TYPE})
+else ifneq ($(filter ${OB_TYPE},simple initenv yocto),${OB_TYPE})
   $(error Invalid value for OB_TYPE: ${OB_TYPE})
 endif
 
@@ -33,10 +33,10 @@ else ifeq ($(realpath ${OB_CONTAINER_DIR}),)
   $(error The directory OB_CONTAINER_DIR must exist)
 endif
 
-ifeq (${OB_TYPE},yocto)
-  ifndef OB_BB_INIT_BUILD_ENV
-    $(error The file OB_BB_INIT_BUILD_ENV must be specified in the environment)
-  else ifeq ($(realpath ${OB_BB_INIT_BUILD_ENV}),)
-    $(error The file OB_BB_INIT_BUILD_ENV must exist)
+ifneq ($(filter initenv yocto,${OB_TYPE}),)
+  ifndef OB_INITENV_SCRIPT
+    $(error The file OB_INITENV_SCRIPT must be specified in the environment)
+  else ifeq ($(realpath ${OB_INITENV_SCRIPT}),)
+    $(error The file OB_INITENV_SCRIPT must exist)
   endif
 endif

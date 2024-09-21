@@ -7,11 +7,15 @@
 # and development purpose.
 
 # The openbar directory. This must be done before any includes.
-OPENBAR_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST}))/..)
+OPENBAR_DIR := $(realpath $(dir $(lastword ${MAKEFILE_LIST}))/../..)
 
 # Include the common makefiles.
 include ${OPENBAR_DIR}/includes/verify-environment.mk
 include ${OPENBAR_DIR}/includes/common.mk
+include ${OPENBAR_DIR}/includes/type.mk
+
+# Save the variables defined before to load the configuration variables.
+VARIABLES_BEFORE_LOAD := VARIABLES_BEFORE_LOAD ${.VARIABLES}
 
 # Load the configuration variables and targets.
 ifeq ($(realpath ${CONFIG}),)
@@ -21,12 +25,9 @@ else
   $(call config-load-targets)
 endif
 
+# Export all the variables loaded from the configuration.
+export $(filter-out ${VARIABLES_BEFORE_LOAD},${.VARIABLES})
+
 # Add the "shell" target.
 shell:
 	${SHELL}
-
-# Export all variables
-export
-
-# But keep internal variables private
-unexport EMPTY COMMA COLON SPACE VERTICALTAB NEWLINE CONFIG_MAKE
