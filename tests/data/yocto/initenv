@@ -1,0 +1,8 @@
+if [ "${SHELL}" != /bin/bash ]; then
+	echo >&2 "Bash is required"
+	exit 1
+fi
+
+export PATH="${OB_DEFCONFIG_DIR}/yocto/bin:${PATH}"
+
+export VAR5=var5
