@@ -9,15 +9,62 @@ theme:
   name: material
   logo: images/openbar.png
   favicon: images/favicon.ico
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
   features:
     - content.action.edit
+    - content.code.annotate
+    - content.code.copy
+    - navigation.footer
+    - navigation.indexes
+    - navigation.tabs
 
 markdown_extensions:
+  - admonition
+  - attr_list
   - def_list
+  - footnotes
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
 
 plugins:
-  - search
   - ezglossary
+  - search
 
 nav:
   - Home: index.md
+  - Getting Started:
+    - getting-started/index.md
+    - System Requirements: getting-started/system-requirements.md
+    - Easy Install: getting-started/easy-install.md
+    - Usage: getting-started/usage.md
+    - Configuration: getting-started/configuration.md
+  - Advanced:
+    - Software Architecture: advanced/software-architecture.md
+    - Variables Glossary: advanced/variables.md
