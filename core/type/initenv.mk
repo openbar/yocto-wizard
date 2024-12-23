@@ -23,6 +23,14 @@ endif
 ${OB_ALL_TARGETS}: .forward
 
 ifeq (${OB_TYPE},yocto)
+  # The OE/Yocto layers must be reconfigured each times for the OB_YOCTO_LAYERS
+  # mechanism to work.
+  .PHONY: .clean-bblayers
+  .clean-bblayers:
+	rm -f ${OB_BUILD_DIR}/conf/bblayers.conf
+
+  .forward: .clean-bblayers
+
   NEXT_LAYER := type/yocto.mk
 else
   NEXT_LAYER := type/simple.mk

@@ -39,15 +39,9 @@ ${OB_ALL_TARGETS}: .forward
 	${QUIET} bitbake-layers show-layers
 
 .PHONY: .add-layers
-.add-layers: .clean-bblayers
+.add-layers:
 ifneq ($(strip ${OB_YOCTO_LAYERS}),)
 	for LAYER in ${OB_YOCTO_LAYERS}; do \
 		${QUIET} bitbake-layers add-layer -F $${LAYER}; \
 	done
 endif
-
-# The OE/Yocto layers must be reconfigured each times for the OB_YOCTO_LAYERS
-# mechanism to work.
-.PHONY: .clean-bblayers
-.clean-bblayers:
-	rm -f ${OB_BUILD_DIR}/conf/bblayers.conf
