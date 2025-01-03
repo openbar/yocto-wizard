@@ -1,1 +1,2 @@
-simple.mk
+hello:
+	echo "${HELLO}"
