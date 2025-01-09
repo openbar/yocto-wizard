@@ -24,7 +24,12 @@ BEGIN				{ FS = ":" }
 /^$/				{ if (multiline == 0) variable_section-- }
 
 # Only explicit variables are valid.
-/^#[[:space:]]+makefile \(from '[[:print:]]+', line [[:digit:]]+\)$/	{ variable = 1 }
+/^#[[:space:]]+makefile \(from '[[:print:]]+', line [[:digit:]]+\)$/ \
+				{ variable = 1 }
+
+# Also allow overridden variables.
+/^#[[:space:]]+'override' directive \(from '[[:print:]]+', line [[:digit:]]+\)$/ \
+				{ variable = 1; override = 1 }
 
 # Explicit targets are defined in the Files section.
 /^#[[:space:]]+Files$/		{ target_section = 1 }
@@ -95,8 +100,13 @@ BEGIN				{ FS = ":" }
 
 {
 	# Remaining variables are printed.
-	if (variable_section > 0 && variable) {
-		print;
+	if (variable_section > 0) {
+		if (override) {
+			override = 0;
+			printf "override ";
+		}
+
+		if (variable) print;
 	}
 
 	# The next variable must be validated again.
