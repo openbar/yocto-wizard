@@ -38,6 +38,11 @@ CONTAINER_RUN += --userns=keep-id
 # Set the HOME, so ~ can be resolved.
 CONTAINER_RUN += -e HOME=${OB_CONTAINER_HOME}
 
+# Ensure HOME is writable.
+LOCAL_HOME := $(shell mktemp -d)
+CONTAINER_RUN := set -e; trap "rm -rf ${LOCAL_HOME}" EXIT; ${CONTAINER_RUN}
+CONTAINER_RUN += -v ${LOCAL_HOME}:${OB_CONTAINER_HOME}
+
 # Add optional extra arguments.
 CONTAINER_RUN += ${OB_PODMAN_RUN_EXTRA_ARGS}
 
