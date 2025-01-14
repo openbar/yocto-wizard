@@ -35,6 +35,9 @@ CONTAINER_RUN += ${CONTAINER_RUN_ARGS}
 # Keep the current UID and GID inside the container.
 CONTAINER_RUN += --userns=keep-id
 
+# Disable podman PIDs limit
+CONTAINER_RUN += --pids-limit=-1
+
 # Set the HOME, so ~ can be resolved.
 CONTAINER_RUN += -e HOME=${OB_CONTAINER_HOME}
 
